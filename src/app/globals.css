@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-paper text-ink antialiased; font-feature-settings: "tnum" 1; }
+  h1 { @apply text-2xl font-bold tracking-tight; }
+  h2 { @apply text-lg font-semibold tracking-tight; }
+  :focus-visible { @apply outline-none ring-2 ring-brand-600 ring-offset-2 ring-offset-paper; }
+  input[type="checkbox"], input[type="radio"] { @apply h-5 w-5 shrink-0 accent-brand-600; }
+  dialog::backdrop { background: rgba(18, 35, 63, 0.45); }
+}
+@layer components {
+  .btn { @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-4 text-[15px] font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800; }
+  .btn-secondary { @apply btn border border-paper-line bg-white text-ink hover:bg-brand-50; }
+  .btn-ghost { @apply btn px-3 text-brand-700 hover:bg-brand-50; }
+  .btn-danger { @apply btn border border-danger-600/30 bg-white text-danger-600 hover:bg-danger-50; }
+  .btn-sm { @apply min-h-[40px] rounded-lg px-3 text-sm; }
+  .card { @apply rounded-2xl border border-paper-line bg-paper-card p-4 shadow-card; }
+  .input { @apply block min-h-[48px] w-full rounded-xl border border-paper-line bg-white px-3.5 text-base text-ink placeholder:text-ink-mute/70 focus:border-brand-600; }
+  .label { @apply mb-1.5 block text-sm font-medium text-ink-soft; }
+  .chip { @apply inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-paper-line bg-white px-3.5 text-sm font-medium text-ink-soft transition-colors; }
+  .chip-on { @apply border-brand-600 bg-brand-50 text-brand-800; }
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .muted { @apply text-sm text-ink-mute; }
+  .row { @apply flex items-center justify-between gap-3; }
+  .section-title { @apply mb-2 mt-6 text-xs font-bold uppercase tracking-wider text-ink-mute; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0ms !important; animation-duration: 0ms !important; } }
+@media print { nav, .no-print { display: none !important; } body { background: #fff; } .card { box-shadow: none; } }
