@@ -12,7 +12,8 @@
     "jobs:run": "tsx --conditions=react-server scripts/run-jobs.ts",
     "premium:grant": "tsx --conditions=react-server scripts/grant-premium.ts",
     "test": "vitest run",
-    "test:e2e": "node e2e/mobile-flow.mjs"
+    "test:e2e": "node e2e/mobile-flow.mjs",
+    "test:e2e:demo": "node e2e/demo-features.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

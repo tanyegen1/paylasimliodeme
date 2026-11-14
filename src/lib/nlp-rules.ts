@@ -130,3 +130,9 @@ export function parseExpenseText(text: string, memberNames: string[]): NlDraft {
   if (!draft.title) draft.title = raw.split(/[.;,](?=\s|$)/)[0].slice(0, 40) || "Harcama";
   return draft;
 }
+
+/** Başlıktan kategori tahmini (formda yalnızca varsayılanı seçmek için). */
+export function guessCategory(text: string): Category | null {
+  const lc = lower(text);
+  return CATEGORY_WORDS.find(([re]) => re.test(lc))?.[1] ?? null;
+}

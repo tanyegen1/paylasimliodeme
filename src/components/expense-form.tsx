@@ -10,6 +10,7 @@ import { CATEGORIES_BY_TYPE, CATEGORY_EMOJI, type Category } from "@/lib/categor
 import { CURRENCY_CODES, convertMinor, formatMoney, minorToInput, parseMoney } from "@/lib/money";
 import { computeShares, type ExpenseInput, type SplitInput } from "@/lib/expense-calc";
 import { SplitError } from "@/lib/split";
+import { guessCategory } from "@/lib/nlp-rules";
 import { t, tDyn } from "@/lib/i18n";
 
 type M = { id: string; name: string };
@@ -29,7 +30,8 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
   const sp = i?.split;
 
   const [title, setTitle] = useState(i?.title ?? "");
-  const [category, setCategory] = useState<Category>(i?.category ?? CATEGORIES_BY_TYPE[groupType]?.[0] ?? "other");
+  const [category, setCategory] = useState<Category>(i?.category ?? "other");
+  const [catTouched, setCatTouched] = useState(!!i);
   const [amount, setAmount] = useState(i ? (i.fx ? minorToInput(i.fx.originalAmount) : i.amount ? minorToInput(i.amount) : "") : "");
   const [currency, setCurrency] = useState(i?.fx?.originalCurrency ?? i?.currency ?? groupCurrency);
   const [date, setDate] = useState(i?.expenseDate ?? today);
@@ -123,7 +125,7 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
       run(() => saveExpenseAction(groupId, initial?.id ?? null, built.input, initial?.version), (d) => { router.push(`/groups/${groupId}/expenses/${d.id}`); router.refresh(); });
     }}>
       {initial?.isDraft && <Notice tone="warn">{t("expense.draftNote")}</Notice>}
-      <Field label={t("expense.title")}><input className="input" required maxLength={120} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("expense.titlePh")} /></Field>
+      <Field label={t("expense.title")}><input className="input" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!catTouched) setCategory(guessCategory(e.target.value) ?? "other"); }} placeholder={t("expense.titlePh")} /></Field>
 
       {type !== "itemized" && (
         <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -153,7 +155,7 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
       <fieldset>
         <legend className="label">{t("expense.category")}</legend>
         <div className="flex flex-wrap gap-2">
-          {cats.map((c) => <button type="button" key={c} aria-pressed={category === c} onClick={() => setCategory(c)} className={`chip ${category === c ? "chip-on" : ""}`}><span aria-hidden>{CATEGORY_EMOJI[c]}</span>{t(`category.${c}`)}</button>)}
+          {cats.map((c) => <button type="button" key={c} aria-pressed={category === c} onClick={() => { setCategory(c); setCatTouched(true); }} className={`chip ${category === c ? "chip-on" : ""}`}><span aria-hidden>{CATEGORY_EMOJI[c]}</span>{t(`category.${c}`)}</button>)}
         </div>
       </fieldset>
 
@@ -253,7 +255,7 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
       </details>
 
       <ErrorText>{error}</ErrorText>
-      <button className="btn-primary sticky bottom-24 shadow-lg" disabled={pending}>{pending ? t("common.wait") : initial ? t("common.save") : t("expense.submit")}</button>
+      <button className="btn-primary" disabled={pending}>{pending ? t("common.wait") : initial ? t("common.save") : t("expense.submit")}</button>
     </form>
   );
 }
