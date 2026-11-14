@@ -61,7 +61,7 @@ export async function createGroup(userId: string, raw: unknown): Promise<Group> 
       `insert into groups (name, type, currency, start_date, end_date, settle_schedule, settle_date, created_by, is_demo)
        values ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *`,
       [input.name, input.type, input.currency, input.startDate ?? null, input.endDate ?? null, input.settleSchedule, input.settleDate ?? null, userId, user.is_demo], db);
-    await db.query(`insert into members (group_id, user_id, display_name, role, position) values ($1,$2,$3,'admin',0)`, [g!.id, userId, user.display_name]);
+    const owner = await q1(`insert into members (group_id, user_id, display_name, role, position) values ($1,$2,$3,'admin',0) returning id`, [g!.id, userId, user.display_name], db);
     const names = new Set([user.display_name.toLocaleLowerCase("tr")]);
     let pos = 1;
     for (const name of input.placeholders) {
@@ -69,7 +69,7 @@ export async function createGroup(userId: string, raw: unknown): Promise<Group> 
       names.add(name.toLocaleLowerCase("tr"));
       await db.query(`insert into members (group_id, display_name, role, position) values ($1,$2,'member',$3)`, [g!.id, name, pos++]);
     }
-    await audit(db, { groupId: g!.id, userId, type: "group.created" });
+    await audit(db, { groupId: g!.id, userId, memberId: owner!.id, type: "group.created" });
     return g!;
   });
   const prior = await q1(`select count(*)::int as n from groups where created_by=$1`, [userId]);

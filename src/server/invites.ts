@@ -69,7 +69,7 @@ function inviteState(inv: Awaited<ReturnType<typeof findInvite>>): "ok" | "inval
 export async function previewInvite(token: string, userId?: string | null) {
   const inv = await findInvite(token);
   const state = inviteState(inv);
-  if (state !== "ok" || !inv) return { state } as const;
+  if (state !== "ok" || !inv) return { state: state as Exclude<typeof state, "ok"> };
   const inviter = await q1(`select display_name from members where id=$1`, [inv.created_by]);
   const count = await q1(`select count(*)::int n from members where group_id=$1 and status='active'`, [inv.group_id]);
   const placeholders = inv.target_member_id
@@ -82,10 +82,10 @@ export async function previewInvite(token: string, userId?: string | null) {
     pendingClaim = !!(await q1(`select 1 from claim_requests where group_id=$1 and user_id=$2 and status='pending'`, [inv.group_id, userId]));
   }
   return {
-    state, groupId: inv.group_id as string, groupName: inv.group_name as string, groupType: inv.group_type as string,
+    state: "ok" as const, groupId: inv.group_id as string, groupName: inv.group_name as string, groupType: inv.group_type as string,
     memberCount: count!.n as number, inviterName: (inviter?.display_name ?? "") as string,
     targeted: !!inv.target_member_id, placeholders, already, pendingClaim, expiresAt: inv.expires_at as Date,
-  } as const;
+  };
 }
 export async function trackInviteOpened(token: string) {
   const inv = await findInvite(token);
