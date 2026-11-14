@@ -56,7 +56,7 @@ Testlerin yakaladığı ve düzeltilen iki gerçek hata: çok ödeyenli harcamal
 | Kur önerisi (TCMB) | Dış sağlayıcı bekliyor | `FX_PROVIDER=tcmb` kodu var; bu ortamda ağdan sınanmadı |
 | Ödeme talebi, kişiye özel ödeme bağlantısı | Çalışıyor | |
 | IBAN ile ödeme, "Ödeme yaptım", alıcı onayı, geri alma | Çalışıyor | Üç ayrı etiket; beyan bakiyeyi değiştirmez |
-| Dekont yükleme | Dış sağlayıcı bekliyor değil; yapılmadı | Veri modeli alanı var, arayüzü yok |
+| Dekont yükleme | Yapılmadı | Veri modeli alanı var, arayüzü yok |
 | Kısmi ödeme, ödeme tarihi önerisi | Çalışıyor | |
 | Uygulama içi ödeme (sağlayıcı ile) | Demo | Yalnızca sandbox simülatörü. Gerçek sağlayıcı bağlı değil |
 | İmzalı webhook, idempotency, sıra dışı olay, durum sorgusu, ters işlem | Çalışıyor | Sandbox üzerinden sınandı; gerçek sağlayıcıyla sınanmadı |
