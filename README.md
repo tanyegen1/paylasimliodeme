@@ -6,7 +6,6 @@ Türkiye için ortak harcama ve hesaplaşma uygulaması. Bir kişi ev, tatil ya 
 
 "Payımız" geçici bir addır. Ad ve marka metinleri tek dosyadan değişir: `src/config/brand.ts`. Marka ya da alan adı müsaitliği doğrulanmamıştır.
 
-Bu klasör, depodaki mevcut statik siteden (`../index.html`) bağımsızdır.
 
 ## Teknoloji
 
