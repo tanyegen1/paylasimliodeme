@@ -1,8 +1,12 @@
+// Uygulama bir vekil sunucunun arkasında çalışıyorsa (ör. GitHub Codespaces) sunucu eylemlerinin
+// kabul edeceği ek adresler. Virgülle ayrılmış liste, ör. "*.app.github.dev".
+const extraOrigins = (process.env.SERVER_ACTIONS_ALLOWED_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["pg"],
-  experimental: { serverActions: { bodySizeLimit: "1mb" } },
+  experimental: { serverActions: { bodySizeLimit: "1mb", allowedOrigins: extraOrigins } },
   async headers() {
     return [
       {

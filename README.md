@@ -7,6 +7,22 @@ Türkiye için ortak harcama ve hesaplaşma uygulaması. Bir kişi ev, tatil ya 
 "Payımız" geçici bir addır. Ad ve marka metinleri tek dosyadan değişir: `src/config/brand.ts`. Marka ya da alan adı müsaitliği doğrulanmamıştır.
 
 
+## GitHub'da çalıştır (Codespaces)
+
+[![GitHub Codespaces'ta aç](https://github.com/codespaces/badge.svg)](https://codespaces.new/tanyegen1/paylasimliodeme)
+
+1. Yukarıdaki düğmeye bas, açılan sayfada **Create codespace**'e tıkla.
+2. İlk açılış birkaç dakika sürer: veritabanı kurulur, demo verisi yüklenir, uygulama derlenir.
+3. Uygulama yeni sekmede açılır. Açılmazsa alttaki **Ports** sekmesinde 3000 numaralı satırdaki küre simgesine tıkla.
+4. Giriş ekranında **Demo hesabıyla gez** bölümünden bir isim seç.
+
+Bu kurulum yalnızca **demo** içindir: örnek kişiler, sandbox ödeme (gerçek para yok), örnek fiş okuma.
+Codespace bir süre kullanılmayınca kendiliğinden durur; tekrar açınca uygulama yeniden başlar.
+Bağlantıyı başkalarıyla paylaşmak için **Ports** sekmesinde 3000'e sağ tıklayıp görünürlüğü **Public** yap; bağlantı codespace açıkken çalışır.
+Codespaces kişisel hesaplarda aylık ücretsiz kullanım kotasıyla gelir; kota ve fiyatlar için GitHub'ın Codespaces faturalandırma sayfasına bak.
+
+Uygulama durursa terminalde: `bash .devcontainer/start.sh`
+
 ## Teknoloji
 
 | Katman | Seçim | Neden |
