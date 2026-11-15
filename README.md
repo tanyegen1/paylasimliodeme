@@ -7,6 +7,16 @@ Türkiye için ortak harcama ve hesaplaşma uygulaması. Bir kişi ev, tatil ya 
 "Payımız" geçici bir addır. Ad ve marka metinleri tek dosyadan değişir: `src/config/brand.ts`. Marka ya da alan adı müsaitliği doğrulanmamıştır.
 
 
+## Kendi internet adresiyle yayınla (Render)
+
+[![Render'a yükle](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/tanyegen1/paylasimliodeme)
+
+1. Düğmeye bas, Render'a **GitHub hesabınla** giriş yap.
+2. Açılan sayfada **Apply** (Uygula) de. Render, `render.yaml` dosyasına göre web sunucusunu ve PostgreSQL veritabanını kendisi kurar.
+3. İlk kurulum birkaç dakika sürer. Bitince Render panelinde `payimiz` hizmetine tıkla; üstte `https://payimiz-….onrender.com` biçiminde adres görünür. Bu adres herhangi bir telefondan açılır.
+
+Bu kurulum **DEMO** içindir (örnek kişiler, sandbox ödeme, gerçek para yok). Ücretsiz planın sınırları Render'ın fiyat sayfasında yazar; ücretsiz sunucu bir süre kullanılmayınca uyur ve ilk açılış yavaş olabilir, ücretsiz veritabanının da süresi sınırlı olabilir. Yüklenen fiş fotoğrafları kalıcı değildir (sunucu yeniden başlayınca silinir).
+
 ## GitHub'da çalıştır (Codespaces)
 
 [![GitHub Codespaces'ta aç](https://github.com/codespaces/badge.svg)](https://codespaces.new/tanyegen1/paylasimliodeme)

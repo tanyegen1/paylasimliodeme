@@ -3,7 +3,8 @@ import "server-only";
 const e = process.env;
 export const env = {
   databaseUrl: e.DATABASE_URL ?? "postgres://payimiz:payimiz@localhost:5432/payimiz_dev",
-  appUrl: (e.APP_URL ?? "http://localhost:3000").replace(/\/$/, ""),
+  // RENDER_EXTERNAL_URL: Render.com hizmetin herkese açık adresini kendisi verir.
+  appUrl: (e.APP_URL ?? e.RENDER_EXTERNAL_URL ?? "http://localhost:3000").replace(/\/$/, ""),
   appSecret: e.APP_SECRET ?? "",
   cronSecret: e.CRON_SECRET ?? "",
   demoMode: e.DEMO_MODE === "true",
