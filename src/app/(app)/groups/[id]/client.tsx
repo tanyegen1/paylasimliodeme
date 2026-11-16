@@ -16,9 +16,14 @@ import { t } from "@/lib/i18n";
 type Transfer = { from: string; to: string; amount: number; currency: string };
 
 /** Hesaplaşma planındaki bir satır için eylemler. Borçlu: Ödeş. Alacaklı: iste / aldım / hatırlat. */
-export function TransferActions({ groupId, groupName, transfer: x, fromName, toName, role, debtorHasAccount }: {
-  groupId: string; groupName: string; transfer: Transfer; fromName: string; toName: string; role: "debtor" | "creditor" | "admin"; debtorHasAccount: boolean;
+export function TransferActions({ groupId, groupName, transfer: x, fromName, toName, role, debtorHasAccount, dark = false, compact = false }: {
+  groupId: string; groupName: string; transfer: Transfer; fromName: string; toName: string; role: "debtor" | "creditor" | "admin"; debtorHasAccount: boolean; dark?: boolean; compact?: boolean;
 }) {
+  // Koyu (gradyan) kart üzerinde kullanıldığında düğme renkleri tersine döner.
+  const primary = dark ? "btn w-full bg-white text-brand-800 hover:bg-brand-50" : "btn-primary w-full";
+  const primarySm = dark ? "btn btn-sm bg-white text-brand-800 hover:bg-brand-50" : "btn-primary btn-sm";
+  const secondarySm = dark ? "btn btn-sm bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25" : "btn-secondary btn-sm";
+  const ghostSm = dark ? "btn btn-sm px-3 text-white/90 hover:bg-white/10" : "btn-ghost btn-sm";
   const router = useRouter();
   const { pending, error, run, setError } = useAct();
   const [share, setShare] = useState<{ url: string; amount: number } | null>(null);
@@ -29,25 +34,40 @@ export function TransferActions({ groupId, groupName, transfer: x, fromName, toN
 
   if (role === "debtor") {
     return (
-      <div className="grid gap-1">
-        <button className="btn-primary" disabled={pending} onClick={() => run(() => settleLinkAction(groupId, body), (d) => router.push(new URL(d.url).pathname))}>
-          {pending ? t("common.wait") : t("settle.pay", { amount: formatMoney(x.amount, x.currency) })}
+      <div className={compact ? "" : "grid gap-1"}>
+        <button className={compact ? primarySm : primary} disabled={pending} onClick={() => run(() => settleLinkAction(groupId, body), (d) => router.push(new URL(d.url).pathname))}>
+          {pending ? t("common.wait") : compact ? t("settle.payShort") : t("settle.pay", { amount: formatMoney(x.amount, x.currency) })}
         </button>
         <ErrorText>{error}</ErrorText>
       </div>
+    );
+  }
+  if (compact) {
+    const text = share ? t("share.payText", { group: groupName, to: firstName(toName), amount: formatMoney(share.amount, x.currency), url: share.url }) : "";
+    return (
+      <>
+        <button className={primarySm} disabled={pending} onClick={() => run(() => settleLinkAction(groupId, body), (d) => { setShare({ url: d.url, amount: d.amount }); router.refresh(); })}>{t("settle.requestShort")}</button>
+        <Sheet open={!!share} onClose={() => setShare(null)} title={t("settle.shareTitle")}>
+          <div className="grid gap-3">
+            <p className="whitespace-pre-line rounded-2xl bg-[#E7F7EC] px-4 py-3 text-[15px] text-ink">{text}</p>
+            <ShareRow text={text} />
+            <p className="muted text-xs">{t("settle.shareNote")}</p>
+          </div>
+        </Sheet>
+      </>
     );
   }
   const text = share ? t("share.payText", { group: groupName, to: firstName(toName), amount: formatMoney(share.amount, x.currency), url: share.url }) : "";
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-2">
-        <button className="btn-primary btn-sm" disabled={pending} onClick={() => run(() => settleLinkAction(groupId, body), (d) => { setShare({ url: d.url, amount: d.amount }); router.refresh(); })}>{t("settle.request")}</button>
-        <button className="btn-secondary btn-sm" onClick={() => { setRecv(true); setError(null); }}>{t("settle.received")}</button>
-        <button className="btn-ghost btn-sm" disabled={pending} onClick={() => { setInfo(null); run(() => remindAction(groupId, x.from, x.currency), () => setInfo(t("settle.reminded", { name: firstName(fromName) }))); }}>{t("settle.remind")}</button>
+        <button className={primarySm} disabled={pending} onClick={() => run(() => settleLinkAction(groupId, body), (d) => { setShare({ url: d.url, amount: d.amount }); router.refresh(); })}>{t("settle.request")}</button>
+        <button className={secondarySm} onClick={() => { setRecv(true); setError(null); }}>{t("settle.received")}</button>
+        <button className={ghostSm} disabled={pending} onClick={() => { setInfo(null); run(() => remindAction(groupId, x.from, x.currency), () => setInfo(t("settle.reminded", { name: firstName(fromName) }))); }}>{t("settle.remind")}</button>
       </div>
-      {!debtorHasAccount && <p className="muted text-xs">{t("settle.noAccountHint", { name: firstName(fromName) })}</p>}
+      {!debtorHasAccount && <p className={`text-xs ${dark ? "text-white/75" : "text-ink-mute"}`}>{t("settle.noAccountHint", { name: firstName(fromName) })}</p>}
       <ErrorText>{!recv && !share ? error : null}</ErrorText>
-      {info && <p role="status" className="text-sm font-medium text-brand-700">{info}</p>}
+      {info && <p role="status" className={`text-sm font-semibold ${dark ? "text-brand-100" : "text-brand-700"}`}>{info}</p>}
 
       <Sheet open={!!share} onClose={() => setShare(null)} title={t("settle.shareTitle")}>
         <div className="grid gap-3">

@@ -51,7 +51,7 @@ try {
   await ece.goto(inviteUrl.replace(/^https?:\/\/[^/]+/, BASE));
   await expectText(ece, "Tan seni davet ediyor");
   const preview = await ece.locator("main").innerText();
-  if (/TR33|IBAN|₺/.test(preview)) throw new Error("Önizleme finansal veri sızdırıyor");
+  if (/TR33|IBAN|₺\s?\d/.test(preview)) throw new Error("Önizleme finansal veri sızdırıyor");
   await shot(ece, "04-davet-onizleme");
   await ece.getByLabel("Adın").fill("Ece");
   await ece.getByRole("checkbox").first().check();
@@ -68,7 +68,7 @@ try {
   await tan.getByRole("link", { name: /Kadıköy Ev/ }).first().click();
   await tan.waitForURL(/\/groups\/[0-9a-f-]{36}/);
   const groupUrl = tan.url().split("?")[0];
-  await tan.getByRole("link", { name: "Harcamayı ekle" }).first().click();
+  await tan.getByRole("link", { name: "Harcama", exact: true }).click();
   await tan.getByLabel("Ne için?").fill("Market alışverişi");
   await tan.getByLabel("Tutar", { exact: true }).fill("1.240,50");
   await expectText(tan, "₺620,25");

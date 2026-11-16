@@ -27,10 +27,10 @@ export function AuthForms({ next, initial, demoUsers }: { next: string; initial:
     <div className="mt-8">
       <h1>{t(`auth.title_${mode}`)}</h1>
       <p className="muted mt-1">{t(`auth.lead_${mode}`)}</p>
-      <div role="tablist" className="mt-5 grid grid-cols-3 gap-1 rounded-xl bg-white p-1 ring-1 ring-paper-line">
+      <div role="tablist" className="mt-6 grid grid-cols-3 gap-1 rounded-2xl bg-paper-sunk p-1">
         {tabs.map((m) => (
           <button key={m} role="tab" aria-selected={mode === m} type="button" onClick={() => { setMode(m); setError(null); }}
-            className={`min-h-[40px] rounded-lg text-sm font-semibold ${mode === m ? "bg-brand-600 text-white" : "text-ink-soft"}`}>{t(`auth.tab_${m}`)}</button>
+            className={`min-h-[42px] rounded-xl text-sm font-bold transition ${mode === m ? "bg-white text-ink shadow-card" : "text-ink-mute"}`}>{t(`auth.tab_${m}`)}</button>
         ))}
       </div>
       <form onSubmit={submit} className="mt-5 grid gap-4">
@@ -54,7 +54,7 @@ export function AuthForms({ next, initial, demoUsers }: { next: string; initial:
         <button className="btn-primary" disabled={pending}>{pending ? t("common.wait") : t(`auth.submit_${mode}`)}</button>
       </form>
       {demoUsers.length > 0 && (
-        <section className="mt-8 rounded-2xl border border-warm-600/30 bg-warm-50 p-4">
+        <section className="mt-8 rounded-3xl bg-warm-50 p-5 ring-1 ring-warm-200">
           <p className="text-sm font-bold text-warm-700">{t("demo.loginTitle")}</p>
           <p className="mt-1 text-xs text-warm-700">{t("demo.loginBody")}</p>
           <div className="mt-3 flex flex-wrap gap-2">

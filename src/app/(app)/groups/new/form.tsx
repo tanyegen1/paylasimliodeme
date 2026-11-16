@@ -5,8 +5,8 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { createGroupAction } from "@/app/actions";
 import { ErrorText, Field, ShareRow, useAct } from "@/components/client";
-import { Notice } from "@/components/ui";
-import { GROUP_EMOJI, GROUP_TYPE_LIST } from "@/lib/group-types";
+import { Avatar, Celebrate, Notice } from "@/components/ui";
+import { GROUP_EMOJI, GROUP_TILE, GROUP_TYPE_LIST } from "@/lib/group-types";
 import { CURRENCY_CODES } from "@/lib/money";
 import { firstName } from "@/lib/format";
 import { t } from "@/lib/i18n";
@@ -37,13 +37,14 @@ export function NewGroupForm({ inviterName }: { inviterName: string }) {
     const text = t("share.inviteText", { inviter: firstName(inviterName), group: name, url: created.inviteUrl });
     return (
       <div className="grid gap-4">
-        <div className="card text-center">
-          <p aria-hidden className="text-4xl">🎉</p>
-          <h2 className="mt-2">{t("newGroup.doneTitle", { name })}</h2>
-          <p className="muted mt-1">{t("newGroup.doneBody")}</p>
+        <div className="hero text-center">
+          <Celebrate />
+          <p aria-hidden className="animate-pop text-5xl">🎉</p>
+          <h2 className="mt-3 text-2xl font-extrabold text-white">{t("newGroup.doneTitle", { name })}</h2>
+          <p className="mt-1 text-[15px] text-white/80">{t("newGroup.doneBody")}</p>
         </div>
         <div className="card grid gap-3">
-          <p className="rounded-xl bg-paper px-3 py-2 text-sm text-ink-soft">{text}</p>
+          <p className="rounded-2xl bg-[#E7F7EC] px-4 py-3 text-[15px] leading-relaxed text-ink">{text}</p>
           <ShareRow text={text} groupId={created.id} />
           <p className="muted text-xs">{t("newGroup.linkNote")}</p>
         </div>
@@ -64,8 +65,8 @@ export function NewGroupForm({ inviterName }: { inviterName: string }) {
         <div className="grid grid-cols-5 gap-2">
           {GROUP_TYPE_LIST.map((v) => (
             <button type="button" key={v} aria-pressed={type === v} onClick={() => pickType(v)}
-              className={`flex min-h-[72px] flex-col items-center justify-center gap-1 rounded-xl border text-xs font-semibold ${type === v ? "border-brand-600 bg-brand-50 text-brand-800" : "border-paper-line bg-white text-ink-soft"}`}>
-              <span aria-hidden className="text-xl">{GROUP_EMOJI[v]}</span>{t(`groupTypeShort.${v}`)}
+              className={`flex min-h-[86px] flex-col items-center justify-center gap-1.5 rounded-2xl text-xs font-bold transition active:scale-95 ${type === v ? "bg-white text-ink shadow-card ring-2 ring-brand-500" : "bg-white/60 text-ink-mute ring-1 ring-paper-line"}`}>
+              <span aria-hidden className={`grid h-11 w-11 place-items-center rounded-xl text-2xl ${GROUP_TILE[v]}`}>{GROUP_EMOJI[v]}</span>{t(`groupTypeShort.${v}`)}
             </button>
           ))}
         </div>
@@ -82,7 +83,7 @@ export function NewGroupForm({ inviterName }: { inviterName: string }) {
         {people.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-2">
             {people.map((p) => (
-              <li key={p} className="chip chip-on">{p}
+              <li key={p} className="chip !pl-1.5"><Avatar name={p} size="xs" />{p}
                 <button type="button" aria-label={t("newGroup.removePerson", { name: p })} onClick={() => setPeople(people.filter((x) => x !== p))}><X aria-hidden className="h-4 w-4" /></button>
               </li>
             ))}

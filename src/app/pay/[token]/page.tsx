@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getPayLink, syncOpenAttemptsForToken } from "@/server/payments";
 import { getUser } from "@/server/session";
 import { brand } from "@/config/brand";
-import { Badge, Notice } from "@/components/ui";
+import { Avatar, Celebrate, Notice } from "@/components/ui";
 import { formatMoney } from "@/lib/money";
 import { formatDate, formatShortDate, firstName } from "@/lib/format";
 import { t } from "@/lib/i18n";
@@ -17,21 +17,21 @@ export default async function PayPage({ params }: { params: Promise<{ token: str
   await syncOpenAttemptsForToken(token).catch(() => {});
   const link = await getPayLink(token);
   const user = await getUser();
-  const tone = { draft: "neutral", pending: "info", processing: "warn", verified: "ok", failed: "bad", cancelled: "neutral", expired: "neutral" } as const;
   return (
-    <main className="mx-auto max-w-xl px-5 pb-16 pt-8">
-      <p className="text-lg font-extrabold tracking-tight text-brand-700">{brand.name}</p>
+    <main className="rise mx-auto max-w-xl px-5 pb-16 pt-8">
+      <p className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-brand-700"><span aria-hidden className="grid h-8 w-8 place-items-center rounded-xl bg-brand-600 text-sm text-white">₺</span>{brand.name}</p>
       {!link ? (
         <div className="card mt-8 text-center"><p aria-hidden className="text-4xl">🔗</p><h1 className="mt-2 text-xl">{t("pay.invalid")}</h1><p className="muted mt-2">{t("pay.invalidBody")}</p></div>
       ) : (
         <>
-          <section className="card mt-6">
-            <div className="row"><p className="muted">{link.groupName}</p><Badge tone={tone[link.status]}>{t(`requestStatus.${link.status}`)}</Badge></div>
-            <p className="mt-3 text-sm">{t("pay.toLine", { from: firstName(link.fromName), to: link.toName })}</p>
-            <p className="mt-1 text-4xl font-extrabold tracking-tight">{formatMoney(link.remaining || link.amount, link.currency)}</p>
-            {link.paid > 0 && link.remaining > 0 && <p className="muted mt-1">{t("pay.partial", { paid: formatMoney(link.paid, link.currency), total: formatMoney(link.amount, link.currency) })}</p>}
-            {link.note && <p className="mt-3 rounded-xl bg-paper px-3 py-2 text-sm">“{link.note}”</p>}
-            <p className="muted mt-3 text-xs">{t("pay.expires", { date: formatDate(link.expiresAt) })}</p>
+          <section className="hero mt-6">
+            {link.status === "verified" && <Celebrate />}
+            <div className="row"><p className="text-sm font-bold text-white/80">{link.groupName}</p><span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold">{t(`requestStatus.${link.status}`)}</span></div>
+            <div className="mt-5 flex items-center gap-3"><Avatar name={link.toName} size="lg" ring /><p className="text-[15px] font-semibold leading-snug text-white/90">{t("pay.toLine", { from: firstName(link.fromName), to: link.toName })}</p></div>
+            <p className="mt-3 text-[2.6rem] font-extrabold leading-none tracking-tight">{formatMoney(link.remaining || link.amount, link.currency)}</p>
+            {link.paid > 0 && link.remaining > 0 && <p className="mt-2 text-sm text-white/80">{t("pay.partial", { paid: formatMoney(link.paid, link.currency), total: formatMoney(link.amount, link.currency) })}</p>}
+            {link.note && <p className="hero-glass mt-4 px-3 py-2 text-sm">“{link.note}”</p>}
+            <p className="mt-4 text-xs text-white/65">{t("pay.expires", { date: formatDate(link.expiresAt) })}</p>
           </section>
 
           {link.expenses.length > 0 && (

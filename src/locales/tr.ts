@@ -20,6 +20,7 @@ export const tr = {
     s2t: "Harcamayı ekle", s2b: "Eşit, tutarla, yüzdeyle ya da fiş kalemlerine göre bölüş. Kuruşu kuruşuna.",
     s3t: "Kim kime ne kadar, net", s3b: "Her bakiyenin hangi harcamadan geldiğini görürsün; ödeşince herkes onaylar.",
     honest: "Paranı biz tutmayız. Ödemeyi kendi bankandan yaparsın; biz hesabı ve onayları takip ederiz.",
+    noApp: "Uygulama indirmek yok. Arkadaşların bağlantıyla katılır.",
   },
   legal: { privacy: "Gizlilik", terms: "Koşullar", kvkk: "KVKK aydınlatma", draftBanner: "TASLAK METİN · Hukuki inceleme yapılmamıştır. Yayına almadan önce bir hukuk danışmanına gösterin." },
   auth: {
@@ -34,7 +35,7 @@ export const tr = {
     legalNote: "Metinler:",
   },
   home: {
-    hello: "Merhaba {name}", notifications: "Bildirimler", totals: "Toplam durum", owedToYou: "Alacağın", youOwe: "Borcun",
+    hello: "Merhaba {name}", headline: "Hesaplar ne durumda?", headlineNew: "Hoş geldin!", allSettled: "Herkesle ödeşiksin ✨", notifications: "Bildirimler", totals: "Toplam durum", owedToYou: "Alacağın", youOwe: "Borcun",
     multiCurrency: "Farklı para birimleri birbirine çevrilmeden ayrı ayrı gösterilir.",
     pending: "Senden bekleyenler", pendingConfirm: "{name}, {amount} ödediğini bildirdi", pendingPay: "{name} için {amount} ödeme talebi", pendingClaim: "{name} gruba katılmak için onayını bekliyor",
     badgeConfirm: "Onayla", badgePay: "Ödeş", badgeApprove: "İncele",
@@ -83,7 +84,10 @@ export const tr = {
   },
   add: { title: "Harcama ekle", pick: "Hangi gruba?", emptyTitle: "Önce bir grup gerekli", emptyBody: "Harcamalar bir grubun içinde tutulur." },
   group: {
-    tabs: "Grup bölümleri", tab_summary: "Özet", tab_expenses: "Harcamalar", tab_balances: "Kim kime", tab_payments: "Ödemeler", tab_members: "Üyeler", tab_settings: "Ayarlar",
+    tabs: "Grup bölümleri", tab_expenses: "Harcamalar", tab_settle: "Hesaplaşma", tab_people: "Kişiler",
+    quick: "Hızlı eylemler", tileAdd: "Harcama", tileReceipt: "Fiş böl", tileQuick: "Yaz / söyle", tileInvite: "Davet et",
+    firstExpenseHint: "İlk harcamayı ekle; kimin payına ne düştüğünü hemen gör.", confirmBanner: "{name} {amount} ödediğini söylüyor. Onaylar mısın?",
+    youPayShort: "{amount} ödeyeceksin", paysYouShort: "sana {amount} ödeyecek", settleDetails: "Hesaplaşma ayrıntıları",
     archivedNote: "Bu grup arşivde. Kayıtlar korunuyor.",
     myBalance: "Bu gruptaki durumun", noExpensesYet: "Henüz harcama yok",
     youPay: "{name} için {amount} ödemen gerekiyor.", paysYou: "{name} sana {amount} ödeyecek.",
@@ -94,7 +98,7 @@ export const tr = {
   expenses: {
     emptyTitle: "Henüz harcama yok", emptyBody: "İlk harcamayı ekle; kimin payına ne düştüğünü hemen gör.",
     paidBy: "{name} ödedi", yourShare: "Payın {amount}", notIncluded: "Dahil değilsin", draft: "Taslak", enterAmount: "Tutar gir", correction: "Düzeltme talebi",
-    deleted: "Silinenler", restore: "Geri al", showDeleted: "Silinen harcamaları göster",
+    deleted: "Silinenler", restore: "Geri al", showDeleted: "Silinen harcamaları göster", waiting: "Tutar bekleyenler",
   },
   category: { rent: "Kira", utilities: "Fatura", internet: "İnternet", groceries: "Market", food: "Yeme içme", transport: "Ulaşım", lodging: "Konaklama", fun: "Eğlence", shopping: "Alışveriş", health: "Sağlık", other: "Diğer" },
   split: { equal: "Eşit", exact: "Tutarla", percent: "Yüzdeyle", shares: "Payla", itemized: "Kalemlerle" },
@@ -126,6 +130,9 @@ export const tr = {
     more: "Tarih, not ve dönem", date: "Tarih", note: "Not",
     period: "Fatura dönemi belirt", periodBody: "Dönem içinde herkes aynı süre kalmadıysa gün bazlı paylaştırabilirsin.", periodFrom: "Dönem başı", periodTo: "Dönem sonu", prorate: "Kalınan güne göre paylaştır",
     submit: "Harcamayı ekle",
+    howMuch: "Ne kadar tuttu?", me: "Ben", splitWith: "Kimler arasında?", everyone: "Herkesi seç", noneAll: "Seçimi temizle", out: "dahil değil",
+    splitDifferently: "Farklı bölüştür", splitHow: "Nasıl bölüşülsün?", backToEqual: "Eşite dön", perHead: "Kişi başı {amount}",
+    roundingShort: "Tam bölünmeyen kuruşlar sırayla dağıtıldı; toplam her zaman tutara eşit.",
   },
   expenseDetail: {
     deleted: "Bu harcama silindi ve bakiyelere dahil değil.", fx: "Özgün tutar {original} · Kur {rate} ({source}, {date})", period: "Dönem: {from} – {to}",
@@ -146,13 +153,13 @@ export const tr = {
     paidTo: "{name} için ödeme yapıldı", receivedFrom: "{name} ödeme yaptı",
   },
   balances: {
-    emptyTitle: "Henüz hesaplanacak bir şey yok", emptyBody: "Harcama ekleyince kim kime ne kadar borçlu burada görünür.", whoPaysWhom: "Kim kime ödeyecek",
+    emptyTitle: "Henüz hesaplanacak bir şey yok", emptyBody: "Harcama ekleyince kim kime ne kadar borçlu burada görünür.", whoPaysWhom: "Kim kime ödeyecek", everyone: "Herkesin durumu",
     simplifiedNote: "Borçlar sadeleştirildi: gereksiz transferler azaltıldı, kimsenin net bakiyesi değişmedi.",
     pairwiseNote: "Sadeleştirme kapalı: borçlar, harcamayı kimin kimin yerine ödediğine göre gösteriliyor.",
     planNote: "Bu liste bir öneridir; bakiyeler yalnızca onaylanan ödemelerle değişir.",
   },
   settle: {
-    pay: "Ödeş · {amount}", request: "Ödeme iste", received: "Ödemeyi aldım", remind: "Nazikçe hatırlat", reminded: "{name} için hatırlatma gönderildi.",
+    pay: "Ödeş · {amount}", payShort: "Ödeş", request: "Ödeme iste", requestShort: "İste", received: "Ödemeyi aldım", remind: "Nazikçe hatırlat", reminded: "{name} için hatırlatma gönderildi.",
     noAccountHint: "{name} henüz gruba katılmadı; uygulama içi hatırlatma gidemez. “Ödeme iste” ile bağlantıyı WhatsApp'tan gönderebilirsin.",
     shareTitle: "Ödeme bağlantısını gönder", shareNote: "Bu bağlantı kişiye özeldir: yalnızca bu borcu gösterir, gruba katılma yetkisi vermez. 14 gün geçerlidir.",
     receivedTitle: "{name} ödeme yaptı", amount: "Aldığın tutar ({currency})", partialHint: "Kısmi ödeme de girebilirsin; kalan borç açık kalır.",
@@ -177,7 +184,7 @@ export const tr = {
   },
   pay: {
     invalid: "Bu ödeme bağlantısı geçerli değil", invalidBody: "Bağlantı iptal edilmiş ya da yanlış kopyalanmış olabilir. Gönderen kişiden yenisini isteyebilirsin.",
-    toLine: "{from}, {to} için kalan borcun", partial: "{total} talebin {paid} kadarı ödendi.", expires: "Bağlantı {date} tarihine kadar geçerli.",
+    toLine: "{to} için kalan borcun", partial: "{total} talebin {paid} kadarı ödendi.", expires: "Bağlantı {date} tarihine kadar geçerli.",
     why: "Bu borç nereden geliyor?", whyNote: "Yalnızca senin payına düşen kalemler gösterilir. Tutar, daha önce yaptığın ödemeler düşülerek hesaplanmıştır.",
     doneTitle: "Bu borç kapandı", doneBody: "Ödemen {to} tarafından onaylandı. Teşekkürler!",
     expiredTitle: "Bağlantının süresi doldu", expiredBody: "Borç kaydı duruyor. {to} sana yeni bir bağlantı gönderebilir.",
@@ -204,7 +211,7 @@ export const tr = {
     delivered: "Sonuç uygulamaya iletildi. Geri dönülüyor…", notDelivered: "Webhook iletilemedi; uygulama durumu sağlayıcıdan sorgulayacak. Geri dönülüyor…",
   },
   members: {
-    admin: "Yönetici", member: "Üye", guest: "Misafir", notJoined: "Henüz katılmadı", left: "ayrıldı", couple: "{name} ile birlikte",
+    title: "Gruptakiler ({n})", admin: "Yönetici", member: "Üye", guest: "Misafir", notJoined: "Henüz katılmadı", left: "ayrıldı", couple: "{name} ile birlikte",
     leftNote: "Ayrılan üyeler: {names}. Geçmiş harcamaları ve açık bakiyeleri korunur.",
     claimAsk: "{requester}, “{placeholder}” olarak gruba katılmak istiyor.", claimWarn: "Onaylarsan {placeholder} adına girilmiş tüm harcama ve borçlar bu kişiye bağlanır. Yalnızca gerçekten o kişi olduğundan eminsen onayla.",
     claimApprove: "Evet, bu o", claimReject: "Reddet",
@@ -227,7 +234,7 @@ export const tr = {
     accept: "Kabul et", decline: "Vazgeç", end: "Birlikte hesaplaşmayı bitir",
   },
   settings: {
-    adminOnly: "Grup ayarlarını yalnızca yöneticiler değiştirebilir.",
+    title: "Grup ayarları", adminOnly: "Grup ayarlarını yalnızca yöneticiler değiştirebilir.",
     simplify: "Borçları sadeleştir", simplifyBody: "Gereksiz transferleri azaltır (örn. A→B ve B→C yerine A→C). Kimsenin net bakiyesi değişmez. Kapatırsan borçlar kimin kimin yerine ödediğine göre gösterilir.",
     archive: "Grubu arşivle", unarchive: "Arşivden çıkar", archiveConfirm: "Grup arşivlensin mi? Kayıtlar silinmez, hatırlatmalar durur.",
     noDelete: "Gruplar silinmez, arşivlenir: böylece kimsenin hesap geçmişi kaybolmaz.",

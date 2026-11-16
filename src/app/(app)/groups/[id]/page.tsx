@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarClock, ChevronRight, FileText, MessageSquareText, Plus, ReceiptText, Repeat } from "lucide-react";
+import { CalendarClock, ChevronRight, FileText, MessageSquareText, Plus, ReceiptText, Repeat, Settings, UserPlus } from "lucide-react";
 import { requireUser } from "@/server/session";
 import { getGroupContext, listCouples } from "@/server/groups";
 import { computeGroupBalances } from "@/server/ledger";
@@ -9,22 +9,23 @@ import { listPaymentActivity } from "@/server/payments";
 import { listReceipts } from "@/server/receipts";
 import { listClaims, listInvites } from "@/server/invites";
 import { runRecurring } from "@/server/recurring";
-import { groupActivity } from "@/server/activity";
 import { getPaymentProvider } from "@/server/providers/payment";
 import { AppError } from "@/server/errors";
-import { Avatar, Badge, BalanceText, Empty, Header, Notice, Page } from "@/components/ui";
+import { q1 } from "@/server/db";
+import { ActionTile, Avatar, AvatarStack, Badge, BalanceText, Celebrate, Empty, Header, Notice, Page } from "@/components/ui";
 import { ActButton } from "@/components/client";
-import { ActivityList } from "@/components/activity";
 import { decideClaimAction, decideReportAction, respondDateAction, restoreExpenseAction, reversePaymentAction, cancelRequestAction, respondCoupleAction, activateRequestAction } from "@/app/actions";
 import { CATEGORY_EMOJI, type Category } from "@/lib/categories";
-import { GROUP_EMOJI } from "@/lib/group-types";
+import { GROUP_EMOJI, GROUP_TILE } from "@/lib/group-types";
 import { formatMoney } from "@/lib/money";
 import { formatDate, formatDateTime, formatShortDate } from "@/lib/format";
 import { t } from "@/lib/i18n";
 import { AddPlaceholder, CouplePropose, IncludeMember, InvitePanel, MemberEdit, RequestShare, SettingsForm, TransferActions } from "./client";
 
-const TABS = ["summary", "expenses", "balances", "payments", "members", "settings"] as const;
-type Tab = (typeof TABS)[number];
+const TABS = ["expenses", "settle", "people"] as const;
+type Tab = (typeof TABS)[number] | "settings";
+/** Eski bağlantılar (bildirimler, e-postalar) yeni sekmelere yönlenir. */
+const ALIAS: Record<string, Tab> = { summary: "expenses", expenses: "expenses", balances: "settle", payments: "settle", settle: "settle", members: "people", people: "people", settings: "settings" };
 
 export default async function GroupPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string; deleted?: string }> }) {
   const { id } = await params;
@@ -40,7 +41,7 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
   const { group, me, members } = ctx;
   // Zamanlayıcı yoksa da tekrarlayan giderler kaçmasın: sayfa açılışında vadesi gelenler üretilir (çift kayıt korumalı).
   await runRecurring(undefined, id).catch(() => 0);
-  const tab: Tab = (TABS as readonly string[]).includes(sp.tab ?? "") ? (sp.tab as Tab) : "summary";
+  const tab: Tab = ALIAS[sp.tab ?? ""] ?? "expenses";
   const name = (mid: string) => members.find((m) => m.id === mid)?.display_name ?? "?";
   const active = members.filter((m) => m.status === "active");
   const balances = await computeGroupBalances(id);
@@ -50,123 +51,168 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
   };
   const myUnit = balances.units[me.id] ?? me.id;
 
+  const myNets = balances.currencies.map((c) => [c, balances.nets[c][me.id] ?? 0] as const).filter(([, v]) => v !== 0);
+  const myTransfers = balances.transfers.filter((x) => x.from === myUnit || x.to === myUnit);
+  const [expenseCount, receipts, claims] = await Promise.all([
+    q1<{ n: number }>(`select count(*)::int n from expenses where group_id=$1 and deleted_at is null and status='active'`, [id]).then((r) => r?.n ?? 0),
+    listReceipts(id, user.id), listClaims(id, user.id),
+  ]);
+  const { reports } = await listPaymentActivity(id, user.id);
+  const toConfirm = reports.filter((r) => r.status === "reported" && (members.find((m) => m.id === r.to_member)?.user_id === user.id || (!members.find((m) => m.id === r.to_member)?.user_id && me.role === "admin")));
+  const settled = expenseCount > 0 && myNets.length === 0 && balances.transfers.length === 0;
+
+  if (tab === "settings") {
+    return (
+      <Page>
+        <Header title={t("settings.title")} back={`/groups/${id}`} subtitle={group.name} />
+        <SettingsForm group={{ id, name: group.name, simplify: group.simplify_debts, schedule: group.settle_schedule, settleDate: group.settle_date, startDate: group.start_date, endDate: group.end_date, type: group.type, archived: !!group.archived_at }} isAdmin={me.role === "admin"} myMemberId={me.id} />
+      </Page>
+    );
+  }
+
   return (
     <Page>
-      <Header title={group.name} back="/groups" subtitle={`${GROUP_EMOJI[group.type]} ${t(`groupType.${group.type}`)} · ${t("groups.members", { n: active.length })}`}
-        action={group.is_demo ? <Badge tone="warn">DEMO</Badge> : undefined} />
-      <nav aria-label={t("group.tabs")} className="-mx-4 mb-4 overflow-x-auto px-4">
-        <ul className="flex min-w-max gap-1.5">
+      <header className="mb-5 flex items-center gap-3">
+        <Link href="/groups" aria-label={t("common.back")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95"><ChevronRight aria-hidden className="h-5 w-5 rotate-180" /></Link>
+        <span aria-hidden className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-2xl ${GROUP_TILE[group.type]}`}>{GROUP_EMOJI[group.type]}</span>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate !text-[1.35rem]">{group.name}</h1>
+          <div className="mt-0.5 flex items-center gap-2"><AvatarStack names={active.map((m) => m.display_name)} max={5} /><span className="whitespace-nowrap text-xs font-semibold text-ink-mute">{t("groups.members", { n: active.length })}</span>{group.is_demo && <Badge tone="warn">DEMO</Badge>}</div>
+        </div>
+        <Link href={`/groups/${id}?tab=settings`} aria-label={t("settings.title")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95"><Settings aria-hidden className="h-5 w-5" /></Link>
+      </header>
+      {group.archived_at && <div className="mb-3"><Notice tone="warn">{t("group.archivedNote")}</Notice></div>}
+
+      <section className="hero">
+        {settled && <Celebrate />}
+        <p className="text-[13px] font-bold uppercase tracking-wider text-white/70">{t("group.myBalance")}</p>
+        {expenseCount === 0 ? (
+          <p className="mt-1.5 text-2xl font-extrabold">{t("group.noExpensesYet")}</p>
+        ) : myNets.length === 0 ? (
+          <p className="mt-1.5 text-2xl font-extrabold">{t("balance.settledLong")}</p>
+        ) : (
+          myNets.map(([c, v]) => (
+            <p key={c} className="mt-1"><span className={`text-sm font-bold ${v > 0 ? "text-brand-100" : "text-warm-200"}`}>{v > 0 ? t("balance.youAreOwed") : t("balance.youOwe")}</span><span className="block text-[2.1rem] font-extrabold leading-tight">{formatMoney(Math.abs(v), c)}</span></p>
+          ))
+        )}
+        {myTransfers.length > 0 && (
+          <ul className="mt-4 grid gap-2">
+            {myTransfers.slice(0, 3).map((x, i) => (
+              <li key={i} className="hero-glass flex items-center gap-3 px-3 py-2.5">
+                <Avatar name={unitName(x.from === myUnit ? x.to : x.from)} size="sm" />
+                <p className="min-w-0 flex-1 text-sm leading-snug">
+                  <span className="block truncate font-bold">{unitName(x.from === myUnit ? x.to : x.from)}</span>
+                  <span className="text-white/75">{x.from === myUnit ? t("group.youPayShort", { amount: formatMoney(x.amount, x.currency) }) : t("group.paysYouShort", { amount: formatMoney(x.amount, x.currency) })}</span>
+                </p>
+                <TransferActions dark compact groupId={id} groupName={group.name} transfer={x} fromName={unitName(x.from)} toName={unitName(x.to)} role={x.from === myUnit ? "debtor" : "creditor"} debtorHasAccount={!!members.find((m) => m.id === x.from)?.user_id} />
+              </li>
+            ))}
+          </ul>
+        )}
+        {myTransfers.length > 0 && <Link href={`/groups/${id}?tab=settle`} className="mt-3 inline-flex items-center gap-1 text-sm font-bold text-white/85 hover:text-white">{t("group.settleDetails")} <ChevronRight aria-hidden className="h-4 w-4" /></Link>}
+        {expenseCount === 0 && <p className="mt-2 text-[15px] text-white/80">{active.length === 1 ? t("group.aloneBody") : t("group.firstExpenseHint")}</p>}
+      </section>
+
+      <nav aria-label={t("group.quick")} className="mt-5 grid grid-cols-4 gap-2">
+        <ActionTile href={`/groups/${id}/expenses/new`} icon={<Plus aria-hidden className="h-6 w-6" strokeWidth={2.6} />} label={t("group.tileAdd")} />
+        <ActionTile href={`/groups/${id}/receipts/new`} icon={<ReceiptText aria-hidden className="h-6 w-6" />} label={t("group.tileReceipt")} tone="warm" />
+        <ActionTile href={`/groups/${id}/quick`} icon={<MessageSquareText aria-hidden className="h-6 w-6" />} label={t("group.tileQuick")} tone="sky" />
+        <ActionTile href={`/groups/${id}?tab=people#invite`} icon={<UserPlus aria-hidden className="h-6 w-6" />} label={t("group.tileInvite")} tone="violet" />
+      </nav>
+
+      {(toConfirm.length > 0 || claims.length > 0 || receipts.length > 0) && (
+        <div className="mt-5 grid gap-2">
+          {toConfirm.map((r) => (
+            <Link key={r.id} href={`/groups/${id}?tab=settle`} className="flex items-center gap-3 rounded-2xl bg-warm-50 px-4 py-3 text-sm text-warm-700 ring-1 ring-warm-200">
+              <Avatar name={name(r.from_member)} size="sm" /><span className="flex-1"><b>{t("group.confirmBanner", { name: name(r.from_member), amount: formatMoney(r.amount_minor, r.currency) })}</b></span><ChevronRight aria-hidden className="h-5 w-5" />
+            </Link>
+          ))}
+          {claims.map((c) => (
+            <Link key={c.id} href={`/groups/${id}?tab=people`} className="flex items-center gap-3 rounded-2xl bg-warm-50 px-4 py-3 text-sm text-warm-700 ring-1 ring-warm-200">
+              <Avatar name={c.requester_name} size="sm" /><span className="flex-1"><b>{t("home.pendingClaim", { name: c.requester_name })}</b></span><ChevronRight aria-hidden className="h-5 w-5" />
+            </Link>
+          ))}
+          {receipts.map((r) => (
+            <Link key={r.id} href={`/groups/${id}/receipts/${r.id}`} className="flex items-center gap-3 rounded-2xl bg-sky-50 px-4 py-3 text-sm text-sky-900 ring-1 ring-sky-100">
+              <ReceiptText aria-hidden className="h-5 w-5 shrink-0" /><span className="flex-1"><b>{r.title}</b> · {r.status === "draft" ? t("receipt.statusDraft") : t("receipt.unclaimedCount", { n: r.unclaimed })}</span><ChevronRight aria-hidden className="h-5 w-5" />
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <nav aria-label={t("group.tabs")} className="sticky top-0 z-10 -mx-4 mt-6 bg-paper/90 px-4 py-2 backdrop-blur">
+        <ul className="grid grid-cols-3 gap-1 rounded-2xl bg-paper-sunk p-1">
           {TABS.map((x) => (
-            <li key={x}><Link href={`/groups/${id}?tab=${x}`} aria-current={tab === x ? "page" : undefined} className={`chip ${tab === x ? "chip-on" : ""}`}>{t(`group.tab_${x}`)}</Link></li>
+            <li key={x}><Link href={`/groups/${id}?tab=${x}`} aria-current={tab === x ? "page" : undefined} className={`flex min-h-[42px] items-center justify-center rounded-xl text-sm font-bold transition ${tab === x ? "bg-white text-ink shadow-card" : "text-ink-mute"}`}>{t(`group.tab_${x}`)}</Link></li>
           ))}
         </ul>
       </nav>
-      {group.archived_at && <div className="mb-3"><Notice tone="warn">{t("group.archivedNote")}</Notice></div>}
 
-      {tab === "summary" && <Summary />}
-      {tab === "expenses" && <Expenses />}
-      {tab === "balances" && <Balances />}
-      {tab === "payments" && <Payments />}
-      {tab === "members" && <Members />}
-      {tab === "settings" && <SettingsForm group={{ id, name: group.name, simplify: group.simplify_debts, schedule: group.settle_schedule, settleDate: group.settle_date, startDate: group.start_date, endDate: group.end_date, type: group.type, archived: !!group.archived_at }} isAdmin={me.role === "admin"} myMemberId={me.id} />}
+      <div className="mt-3">
+        {tab === "expenses" && <Expenses />}
+        {tab === "settle" && <><Balances /><Payments /></>}
+        {tab === "people" && <Members />}
+      </div>
     </Page>
   );
-
-  async function Summary() {
-    const [expenses, receipts, activity] = await Promise.all([listExpenses(id, user.id), listReceipts(id, user.id), groupActivity(id, user.id, 5)]);
-    const drafts = expenses.filter((e) => e.status === "draft" && !e.deleted_at);
-    const myTransfers = balances.transfers.filter((x) => x.from === myUnit || x.to === myUnit);
-    const actions = [
-      { href: `/groups/${id}/expenses/new`, icon: Plus, label: t("group.addExpense") },
-      { href: `/groups/${id}/receipts/new`, icon: ReceiptText, label: t("group.shareReceipt") },
-      { href: `/groups/${id}/quick`, icon: MessageSquareText, label: t("group.quickAdd") },
-      ...(group.type === "home" ? [{ href: `/groups/${id}/recurring`, icon: Repeat, label: t("group.recurring") }] : []),
-      { href: `/groups/${id}/summary`, icon: FileText, label: group.type === "home" ? t("group.monthly") : t("group.report") },
-    ];
-    return (
-      <div className="grid gap-4">
-        <section className="card">
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink-mute">{t("group.myBalance")}</p>
-          {balances.currencies.filter((c) => (balances.nets[c][me.id] ?? 0) !== 0).length === 0 ? (
-            <p className="mt-1 text-xl font-bold">{expenses.length ? t("balance.settledLong") : t("group.noExpensesYet")}</p>
-          ) : (
-            balances.currencies.map((c) => (balances.nets[c][me.id] ?? 0) !== 0 && <p key={c} className="mt-1 text-xl"><BalanceText net={balances.nets[c][me.id]} currency={c} /></p>)
-          )}
-          {myTransfers.length > 0 && (
-            <ul className="mt-3 grid gap-3 border-t border-paper-line pt-3">
-              {myTransfers.map((x, i) => (
-                <li key={i} className="grid gap-2">
-                  <p className="text-sm">{x.from === myUnit ? t("group.youPay", { name: unitName(x.to), amount: formatMoney(x.amount, x.currency) }) : t("group.paysYou", { name: unitName(x.from), amount: formatMoney(x.amount, x.currency) })}</p>
-                  <TransferActions groupId={id} groupName={group.name} transfer={x} fromName={unitName(x.from)} toName={unitName(x.to)} role={x.from === myUnit ? "debtor" : "creditor"} debtorHasAccount={!!members.find((m) => m.id === x.from)?.user_id} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {drafts.map((d) => (
-          <Link key={d.id} href={`/groups/${id}/expenses/${d.id}/edit`} className="flex items-center gap-3 rounded-2xl border border-warm-600/30 bg-warm-50 px-4 py-3 text-sm text-warm-700">
-            <CalendarClock aria-hidden className="h-5 w-5 shrink-0" />
-            <span className="flex-1"><b>{d.title}</b> · {t("group.draftWaiting", { date: formatShortDate(d.expense_date) })}</span>
-            <ChevronRight aria-hidden className="h-5 w-5" />
-          </Link>
-        ))}
-        {receipts.map((r) => (
-          <Link key={r.id} href={`/groups/${id}/receipts/${r.id}`} className="flex items-center gap-3 rounded-2xl border border-sky-600/20 bg-sky-50 px-4 py-3 text-sm text-sky-900">
-            <ReceiptText aria-hidden className="h-5 w-5 shrink-0" />
-            <span className="flex-1"><b>{r.title}</b> · {r.status === "draft" ? t("receipt.statusDraft") : t("receipt.unclaimedCount", { n: r.unclaimed })}</span>
-            <ChevronRight aria-hidden className="h-5 w-5" />
-          </Link>
-        ))}
-
-        <div className="grid grid-cols-2 gap-2">
-          {actions.map((a, i) => (
-            <Link key={a.href} href={a.href} className={`${i === 0 ? "btn-primary col-span-2" : "btn-secondary"} justify-start`}><a.icon aria-hidden className="h-5 w-5" />{a.label}</Link>
-          ))}
-        </div>
-
-        {expenses.length === 0 && active.length === 1 && <Notice title={t("group.aloneTitle")}>{t("group.aloneBody")} <Link className="font-semibold underline" href={`/groups/${id}?tab=members`}>{t("group.invite")}</Link></Notice>}
-        {activity.length > 0 && (<div><h2 className="section-title !mt-2">{t("home.recent")}</h2><ActivityList rows={activity} /></div>)}
-      </div>
-    );
-  }
 
   async function Expenses() {
     const all = await listExpenses(id, user.id, { includeDeleted: sp.deleted === "1" });
     const live = all.filter((e) => !e.deleted_at);
     const deleted = all.filter((e) => e.deleted_at);
-    if (!all.length) return <Empty icon="🧾" title={t("expenses.emptyTitle")} body={t("expenses.emptyBody")}><Link href={`/groups/${id}/expenses/new`} className="btn-primary">{t("group.addExpense")}</Link></Empty>;
+    const extras = (
+      <div className="flex flex-wrap gap-2">
+        {group.type === "home" && <Link href={`/groups/${id}/recurring`} className="chip"><Repeat aria-hidden className="h-4 w-4" />{t("group.recurring")}</Link>}
+        <Link href={`/groups/${id}/summary`} className="chip"><FileText aria-hidden className="h-4 w-4" />{group.type === "home" ? t("group.monthly") : t("group.report")}</Link>
+      </div>
+    );
+    if (!all.length) return <div className="grid gap-4"><Empty icon="🧾" title={t("expenses.emptyTitle")} body={t("expenses.emptyBody")}><Link href={`/groups/${id}/expenses/new`} className="btn-primary">{t("group.addExpense")}</Link></Empty>{extras}</div>;
+    // Tarihe göre gruplanmış liste
+    const days: { date: string; items: typeof live }[] = [];
+    for (const e of live) {
+      const key = e.status === "draft" ? "draft" : e.expense_date;
+      const d = days.find((x) => x.date === key);
+      if (d) d.items.push(e); else days.push({ date: key, items: [e] });
+    }
     return (
-      <div className="grid gap-3">
-        <ul className="card divide-y divide-paper-line p-0">
-          {live.map((e) => (
-            <li key={e.id}>
-              <Link href={e.status === "draft" ? `/groups/${id}/expenses/${e.id}/edit` : `/groups/${id}/expenses/${e.id}`} className="flex items-center gap-3 px-4 py-3">
-                <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-paper text-lg">{CATEGORY_EMOJI[e.category as Category] ?? "🧾"}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2"><span className="truncate font-semibold">{e.title}</span>{e.open_requests > 0 && <Badge tone="warn">{t("expenses.correction")}</Badge>}</span>
-                  <span className="muted block truncate text-xs">{formatShortDate(e.expense_date)} · {e.status === "draft" ? t("expenses.draft") : t("expenses.paidBy", { name: e.payer_names.join(", ") })}</span>
-                </span>
-                <span className="text-right">
-                  {e.status === "draft" ? <Badge tone="warn">{t("expenses.enterAmount")}</Badge> : (
-                    <>
-                      <span className="block font-bold">{formatMoney(e.amount_minor, e.currency)}</span>
-                      <span className="muted block text-xs">{e.my_share > 0 ? t("expenses.yourShare", { amount: formatMoney(e.my_share, e.currency) }) : t("expenses.notIncluded")}</span>
-                    </>
-                  )}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+      <div className="grid gap-4">
+        {days.map((d) => (
+          <section key={d.date}>
+            <h3 className="mb-2 px-1 text-[13px] font-bold text-ink-mute">{d.date === "draft" ? t("expenses.waiting") : formatDate(d.date)}</h3>
+            <ul className="card divide-y divide-paper-line/80 !p-1">
+              {d.items.map((e) => (
+                <li key={e.id}>
+                  <Link href={e.status === "draft" ? `/groups/${id}/expenses/${e.id}/edit` : `/groups/${id}/expenses/${e.id}`} className="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-paper">
+                    <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-paper text-[22px]">{CATEGORY_EMOJI[e.category as Category] ?? "🧾"}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-center gap-2"><span className="truncate text-[15px] font-bold">{e.title}</span>{e.open_requests > 0 && <Badge tone="warn">{t("expenses.correction")}</Badge>}</span>
+                      <span className="block truncate text-[13px] text-ink-mute">{e.status === "draft" ? t("expenses.draft") : t("expenses.paidBy", { name: e.payer_names.join(", ") })}</span>
+                    </span>
+                    <span className="text-right">
+                      {e.status === "draft" ? <Badge tone="warn">{t("expenses.enterAmount")}</Badge> : (
+                        <>
+                          <span className="block text-[15px] font-extrabold">{formatMoney(e.amount_minor, e.currency)}</span>
+                          <span className={`block text-xs font-semibold ${e.my_paid - e.my_share > 0 ? "text-brand-700" : e.my_share > 0 ? "text-warm-700" : "text-ink-faint"}`}>
+                            {e.my_share > 0 ? t("expenses.yourShare", { amount: formatMoney(e.my_share, e.currency) }) : t("expenses.notIncluded")}
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+        {extras}
         {sp.deleted === "1" ? (
           deleted.length > 0 && (
             <div>
               <h2 className="section-title">{t("expenses.deleted")}</h2>
-              <ul className="card divide-y divide-paper-line p-0">
+              <ul className="card divide-y divide-paper-line !p-1">
                 {deleted.map((e) => (
-                  <li key={e.id} className="row px-4 py-3">
-                    <span className="min-w-0"><span className="block truncate font-semibold line-through">{e.title}</span><span className="muted text-xs">{formatMoney(e.amount_minor, e.currency)} · {formatShortDate(e.expense_date)}</span></span>
+                  <li key={e.id} className="row px-3 py-3">
+                    <span className="min-w-0"><span className="block truncate font-semibold line-through opacity-70">{e.title}</span><span className="muted text-xs">{formatMoney(e.amount_minor, e.currency)} · {formatShortDate(e.expense_date)}</span></span>
                     {!e.receipt_id && <ActButton action={restoreExpenseAction.bind(null, id, e.id)} label={t("expenses.restore")} />}
                   </li>
                 ))}
@@ -174,7 +220,7 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
             </div>
           )
         ) : (
-          <Link href={`/groups/${id}?tab=expenses&deleted=1`} className="btn-ghost btn-sm justify-self-start">{t("expenses.showDeleted")}</Link>
+          <Link href={`/groups/${id}?tab=expenses&deleted=1`} className="justify-self-center text-sm font-semibold text-ink-mute underline-offset-4 hover:underline">{t("expenses.showDeleted")}</Link>
         )}
       </div>
     );
@@ -182,45 +228,49 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
 
   function Balances() {
     const any = balances.currencies.length > 0;
+    if (!any) return <Empty icon="⚖️" title={t("balances.emptyTitle")} body={t("balances.emptyBody")} />;
     return (
-      <div className="grid gap-4">
-        {!any && <Empty icon="⚖️" title={t("balances.emptyTitle")} body={t("balances.emptyBody")} />}
+      <div className="grid gap-5">
+        <section>
+          <h2 className="section-title !mt-1">{t("balances.whoPaysWhom")}</h2>
+          {balances.transfers.length === 0 ? (
+            <div className="hero text-center"><Celebrate /><p aria-hidden className="text-4xl">🎉</p><p className="mt-2 text-xl font-extrabold">{t("balance.settledLong")}</p></div>
+          ) : (
+            <ul className="grid gap-2.5">
+              {balances.transfers.map((x, i) => {
+                const mineAs = x.from === myUnit ? "debtor" : x.to === myUnit ? "creditor" : me.role === "admin" ? "admin" : null;
+                return (
+                  <li key={i} className="card grid gap-3 !p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center"><Avatar name={unitName(x.from)} size="sm" /><span aria-hidden className="mx-1.5 text-ink-faint">→</span><Avatar name={unitName(x.to)} size="sm" /></span>
+                      <p className="min-w-0 flex-1 text-sm leading-snug"><b>{unitName(x.from)}</b> <span className="text-ink-mute">→</span> <b>{unitName(x.to)}</b></p>
+                      <p className="text-[17px] font-extrabold">{formatMoney(x.amount, x.currency)}</p>
+                    </div>
+                    {mineAs && <TransferActions groupId={id} groupName={group.name} transfer={x} fromName={unitName(x.from)} toName={unitName(x.to)} role={mineAs} debtorHasAccount={!!members.find((m) => m.id === x.from)?.user_id} />}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <p className="mt-3 px-1 text-xs leading-relaxed text-ink-mute">{balances.simplified ? t("balances.simplifiedNote") : t("balances.pairwiseNote")} {t("balances.planNote")}</p>
+        </section>
         {balances.currencies.map((c) => (
           <section key={c}>
-            {balances.currencies.length > 1 && <h2 className="section-title !mt-0">{c} · {t(`currency.${c}` as "currency.TRY")}</h2>}
-            <ul className="card divide-y divide-paper-line p-0">
+            <h2 className="section-title !mt-0">{t("balances.everyone")}{balances.currencies.length > 1 ? ` · ${c}` : ""}</h2>
+            <ul className="card divide-y divide-paper-line/80 !p-1">
               {members.filter((m) => m.status === "active" || (balances.nets[c][m.id] ?? 0) !== 0).map((m) => (
                 <li key={m.id}>
-                  <Link href={`/groups/${id}/balance/${m.id}`} className="flex items-center gap-3 px-4 py-3">
+                  <Link href={`/groups/${id}/balance/${m.id}`} className="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-paper">
                     <Avatar name={m.display_name} size="sm" />
-                    <span className="flex-1 truncate text-sm font-semibold">{m.display_name}{m.id === me.id && <span className="muted font-normal"> ({t("common.you")})</span>}{m.status === "left" && <span className="muted font-normal"> · {t("members.left")}</span>}</span>
+                    <span className="flex-1 truncate text-[15px] font-semibold">{m.display_name}{m.id === me.id && <span className="text-ink-mute font-normal"> ({t("common.you")})</span>}{m.status === "left" && <span className="text-ink-mute font-normal"> · {t("members.left")}</span>}</span>
                     <BalanceText net={balances.nets[c][m.id] ?? 0} currency={c} mine={m.id === me.id} className="text-sm" />
-                    <ChevronRight aria-hidden className="h-4 w-4 text-ink-mute" />
+                    <ChevronRight aria-hidden className="h-4 w-4 text-ink-faint" />
                   </Link>
                 </li>
               ))}
             </ul>
           </section>
         ))}
-        {any && (
-          <section>
-            <h2 className="section-title !mt-2">{t("balances.whoPaysWhom")}</h2>
-            {balances.transfers.length === 0 ? <Notice tone="ok">{t("balance.settledLong")}</Notice> : (
-              <ul className="grid gap-2">
-                {balances.transfers.map((x, i) => {
-                  const mineAs = x.from === myUnit ? "debtor" : x.to === myUnit ? "creditor" : me.role === "admin" ? "admin" : null;
-                  return (
-                    <li key={i} className="card grid gap-3">
-                      <p className="text-sm"><b>{unitName(x.from)}</b> → <b>{unitName(x.to)}</b><span className="float-right text-base font-bold">{formatMoney(x.amount, x.currency)}</span></p>
-                      {mineAs && <TransferActions groupId={id} groupName={group.name} transfer={x} fromName={unitName(x.from)} toName={unitName(x.to)} role={mineAs} debtorHasAccount={!!members.find((m) => m.id === x.from)?.user_id} />}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            <p className="muted mt-3 text-xs">{balances.simplified ? t("balances.simplifiedNote") : t("balances.pairwiseNote")} {t("balances.planNote")}</p>
-          </section>
-        )}
       </div>
     );
   }
@@ -233,9 +283,9 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
     const openReports = reports.filter((r) => r.status === "reported");
     const openReqs = requests.filter((r) => ["draft", "pending", "processing", "failed"].includes(r.status));
     const reqTone = { draft: "neutral", pending: "info", processing: "warn", verified: "ok", failed: "bad", cancelled: "neutral", expired: "neutral" } as const;
-    if (!requests.length && !reports.length && !payments.length) return <Empty icon="🤝" title={t("payments.emptyTitle")} body={t("payments.emptyBody")}><Link className="btn-secondary" href={`/groups/${id}?tab=balances`}>{t("group.tab_balances")}</Link></Empty>;
+    if (!requests.length && !reports.length && !payments.length) return null;
     return (
-      <div className="grid gap-4">
+      <div className="mt-6 grid gap-4">
         {!provider && <Notice>{t("payments.manualOnly")}</Notice>}
         {provider?.isDemo && <Notice tone="warn">{t("payments.sandboxNote")}</Notice>}
         {openReports.length > 0 && (
@@ -334,14 +384,24 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
             ))}
           </section>
         )}
-        <ul className="card divide-y divide-paper-line p-0">
+        {canInvite ? (
+          <section id="invite" className="card grid gap-3 scroll-mt-20">
+            <div className="flex items-center gap-3"><span aria-hidden className="grid h-12 w-12 place-items-center rounded-2xl bg-violet-50 text-2xl">💌</span><h2>{t("members.inviteTitle")}</h2></div>
+            <p className="muted">{t("members.inviteBody")}</p>
+            <InvitePanel groupId={id} groupName={group.name} inviterName={me.display_name} activeLinks={invites.map((i) => ({ id: i.id, label: i.target_name ? t("members.linkFor", { name: i.target_name }) : t("members.linkGeneral"), meta: t("members.linkMeta", { date: formatDate(i.expires_at), n: i.use_count }) }))} canRevoke={me.role === "admin"} />
+            <div className="border-t border-paper-line pt-3"><AddPlaceholder groupId={id} /></div>
+          </section>
+        ) : <Notice>{t("members.guestNote")} <Link className="font-semibold underline" href="/profile#secure">{t("home.secureTitle")}</Link></Notice>}
+
+        <h2 className="section-title !mb-0 !mt-2">{t("members.title", { n: active.length })}</h2>
+        <ul className="card divide-y divide-paper-line/80 !p-1">
           {active.map((m) => {
             const c = coupleOf(m.id);
             return (
-              <li key={m.id} className="flex items-center gap-3 px-4 py-3">
+              <li key={m.id} className="flex items-center gap-3 rounded-2xl px-3 py-3">
                 <Avatar name={m.display_name} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold">{m.display_name}{m.id === me.id && <span className="muted font-normal"> ({t("common.you")})</span>}</p>
+                  <p className="truncate text-[15px] font-bold">{m.display_name}{m.id === me.id && <span className="muted font-normal"> ({t("common.you")})</span>}</p>
                   <p className="flex flex-wrap gap-1.5">
                     {m.role === "admin" && <Badge tone="ok">{t("members.admin")}</Badge>}
                     {m.role === "guest" && <Badge>{t("members.guest")}</Badge>}
@@ -359,15 +419,6 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
           })}
         </ul>
         {members.some((m) => m.status === "left") && <p className="muted text-xs">{t("members.leftNote", { names: members.filter((m) => m.status === "left").map((m) => m.display_name).join(", ") })}</p>}
-
-        {canInvite ? (
-          <section className="card grid gap-3">
-            <h2>{t("members.inviteTitle")}</h2>
-            <p className="muted">{t("members.inviteBody")}</p>
-            <InvitePanel groupId={id} groupName={group.name} inviterName={me.display_name} activeLinks={invites.map((i) => ({ id: i.id, label: i.target_name ? t("members.linkFor", { name: i.target_name }) : t("members.linkGeneral"), meta: t("members.linkMeta", { date: formatDate(i.expires_at), n: i.use_count }) }))} canRevoke={me.role === "admin"} />
-            <div className="border-t border-paper-line pt-3"><AddPlaceholder groupId={id} /></div>
-          </section>
-        ) : <Notice>{t("members.guestNote")} <Link className="font-semibold underline" href="/profile#secure">{t("home.secureTitle")}</Link></Notice>}
 
         {group.type === "trip" && (
           <section className="card grid gap-2">

@@ -21,16 +21,16 @@ export function describe(row: ActivityRow): string {
 
 export function ActivityList({ rows, showGroup = false }: { rows: ActivityRow[]; showGroup?: boolean }) {
   return (
-    <ul className="card divide-y divide-paper-line p-0">
+    <ul className="card divide-y divide-paper-line/80 !p-1">
       {rows.map((r) => {
         const href = r.type.startsWith("expense.") && r.entity_id ? `/groups/${r.group_id}/expenses/${r.entity_id}` : `/groups/${r.group_id}`;
         return (
           <li key={r.id}>
-            <Link href={href} className="flex items-start gap-3 px-4 py-3">
-              <span aria-hidden className="mt-0.5 text-lg">{ICON[r.type] ?? "•"}</span>
-              <span className="min-w-0 flex-1 text-sm">
-                <span className="block">{describe(r)}</span>
-                <span className="muted text-xs">{showGroup ? `${r.group_name} · ` : ""}{formatDateTime(r.created_at)}</span>
+            <Link href={href} className="flex items-center gap-3 rounded-2xl px-3 py-3 transition hover:bg-paper">
+              <span aria-hidden className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-lg">{ICON[r.type] ?? "•"}</span>
+              <span className="min-w-0 flex-1 text-[14px]">
+                <span className="block font-semibold leading-snug">{describe(r)}</span>
+                <span className="text-xs text-ink-mute">{showGroup ? `${r.group_name} · ` : ""}{formatDateTime(r.created_at)}</span>
               </span>
             </Link>
           </li>

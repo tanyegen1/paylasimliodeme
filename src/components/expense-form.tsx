@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { prorationAction, saveExpenseAction, suggestRateAction } from "@/app/actions";
 import { ErrorText, Field, useAct } from "@/components/client";
-import { Notice } from "@/components/ui";
+import { Avatar, Notice } from "@/components/ui";
 import { CATEGORIES_BY_TYPE, CATEGORY_EMOJI, type Category } from "@/lib/categories";
 import { CURRENCY_CODES, convertMinor, formatMoney, minorToInput, parseMoney } from "@/lib/money";
 import { computeShares, type ExpenseInput, type SplitInput } from "@/lib/expense-calc";
@@ -118,20 +118,31 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
     });
   };
 
+  const advanced = type !== "equal";
+  const allOn = included.length === members.length;
+  const perHead = built.shares && type === "equal" && built.shares.length ? built.shares[built.shares.length - 1].amount : null;
+
   return (
-    <form className="grid gap-5" onSubmit={(e) => {
+    <form className="grid gap-6 pb-10" onSubmit={(e) => {
       e.preventDefault();
       if (!built.input) return setError(built.problem ?? t("errors.generic"));
       run(() => saveExpenseAction(groupId, initial?.id ?? null, built.input, initial?.version), (d) => { router.push(`/groups/${groupId}/expenses/${d.id}`); router.refresh(); });
     }}>
       {initial?.isDraft && <Notice tone="warn">{t("expense.draftNote")}</Notice>}
-      <Field label={t("expense.title")}><input className="input" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!catTouched) setCategory(guessCategory(e.target.value) ?? "other"); }} placeholder={t("expense.titlePh")} /></Field>
 
       {type !== "itemized" && (
-        <div className="grid grid-cols-[1fr_auto] gap-2">
-          <Field label={t("expense.amount")}><input className="input text-xl font-bold" inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" autoFocus={!initial} /></Field>
-          <Field label={t("expense.currency")}><select className="input" value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCY_CODES.map((c) => <option key={c}>{c}</option>)}</select></Field>
-        </div>
+        <section className="card text-center">
+          <label htmlFor="amount" className="text-sm font-bold text-ink-mute">{t("expense.howMuch")}</label>
+          <div className="mt-1 flex items-center justify-center gap-2">
+            <input id="amount" aria-label={t("expense.amount")} className="w-full min-w-0 bg-transparent text-center text-[2.6rem] font-extrabold tracking-tight text-ink outline-none placeholder:text-ink-faint/60"
+              inputMode="decimal" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0,00" autoFocus={!initial} />
+          </div>
+          <div className="mt-2 flex justify-center">
+            <select aria-label={t("expense.currency")} className="rounded-full bg-paper-sunk px-3 py-1.5 text-sm font-bold text-ink-soft outline-none" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+              {CURRENCY_CODES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+        </section>
       )}
       {foreign && type !== "itemized" && (
         <div className="card grid gap-3">
@@ -145,98 +156,131 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
               </div>
               <Field label={t("expense.rateSource")}><input className="input" maxLength={40} value={rateSource} onChange={(e) => setRateSource(e.target.value)} /></Field>
               {fxEnabled && <button type="button" className="btn-secondary btn-sm justify-self-start" onClick={() => run(() => suggestRateAction(currency, groupCurrency), (r) => { if (!r) return setError(t("expense.rateUnavailable")); setRate(r.rate.replace(".", ",")); setRateSource(r.source); setRateDate(r.date); })}>{t("expense.rateSuggest")}</button>}
-              {built.input?.fx && <p className="text-sm">{t("expense.converted", { original: formatMoney(built.input.fx.originalAmount, currency), amount: formatMoney(built.input.amount, groupCurrency) })}</p>}
+              {built.input?.fx && <p className="text-sm font-semibold">{t("expense.converted", { original: formatMoney(built.input.fx.originalAmount, currency), amount: formatMoney(built.input.amount, groupCurrency) })}</p>}
               <p className="muted text-xs">{t("expense.rateNote")}</p>
             </>
           )}
         </div>
       )}
 
-      <fieldset>
-        <legend className="label">{t("expense.category")}</legend>
-        <div className="flex flex-wrap gap-2">
-          {cats.map((c) => <button type="button" key={c} aria-pressed={category === c} onClick={() => { setCategory(c); setCatTouched(true); }} className={`chip ${category === c ? "chip-on" : ""}`}><span aria-hidden>{CATEGORY_EMOJI[c]}</span>{t(`category.${c}`)}</button>)}
+      <div className="grid gap-3">
+        <Field label={t("expense.title")}><input className="input" required maxLength={120} value={title} onChange={(e) => { setTitle(e.target.value); if (!catTouched) setCategory(guessCategory(e.target.value) ?? "other"); }} placeholder={t("expense.titlePh")} /></Field>
+        <div className="-mx-4 overflow-x-auto px-4" role="group" aria-label={t("expense.category")}>
+          <div className="flex min-w-max gap-2">
+            {cats.map((c) => <button type="button" key={c} aria-pressed={category === c} onClick={() => { setCategory(c); setCatTouched(true); }} className={`chip !min-h-[38px] !px-3 ${category === c ? "chip-on" : ""}`}><span aria-hidden>{CATEGORY_EMOJI[c]}</span>{t(`category.${c}`)}</button>)}
+          </div>
         </div>
-      </fieldset>
+      </div>
 
-      <fieldset className="grid gap-2">
+      <fieldset>
         <legend className="label">{t("expense.paidBy")}</legend>
         {!multiPayer ? (
-          <select className="input" aria-label={t("expense.paidBy")} value={payer} onChange={(e) => setPayer(e.target.value)}>{members.map((m) => <option key={m.id} value={m.id}>{m.name}{m.id === meId ? ` (${t("common.you")})` : ""}</option>)}</select>
+          <div className="-mx-4 overflow-x-auto px-4"><div className="flex min-w-max gap-2 pb-1">
+            {members.map((m) => {
+              const on = payer === m.id;
+              return (
+                <button type="button" key={m.id} aria-pressed={on} onClick={() => setPayer(m.id)}
+                  className={`flex w-[74px] flex-col items-center gap-1.5 rounded-2xl px-1 py-2.5 text-xs font-bold transition active:scale-95 ${on ? "bg-brand-600 text-white shadow-lift" : "bg-white text-ink-soft ring-1 ring-paper-line"}`}>
+                  <Avatar name={m.name} size="md" ring={on} />
+                  <span className="w-full truncate">{m.id === meId ? t("expense.me") : m.name}</span>
+                </button>
+              );
+            })}
+          </div></div>
         ) : (
-          <ul className="grid gap-2">{members.map((m) => (
-            <li key={m.id} className="grid grid-cols-[1fr_8rem] items-center gap-2"><span className="text-sm">{m.name}</span>
-              <input className="input" inputMode="decimal" aria-label={t("expense.paidAmountOf", { name: m.name })} placeholder="0,00" value={payerAmounts[m.id] ?? ""} onChange={(e) => setPayerAmounts({ ...payerAmounts, [m.id]: e.target.value })} /></li>
+          <ul className="card grid gap-2 !p-3">{members.map((m) => (
+            <li key={m.id} className="grid grid-cols-[auto_1fr_8rem] items-center gap-3"><Avatar name={m.name} size="sm" /><span className="text-sm font-semibold">{m.name}</span>
+              <input className="input !min-h-[44px] text-right" inputMode="decimal" aria-label={t("expense.paidAmountOf", { name: m.name })} placeholder="0,00" value={payerAmounts[m.id] ?? ""} onChange={(e) => setPayerAmounts({ ...payerAmounts, [m.id]: e.target.value })} /></li>
           ))}</ul>
         )}
-        <button type="button" className="btn-ghost btn-sm justify-self-start" onClick={() => setMultiPayer(!multiPayer)}>{multiPayer ? t("expense.singlePayer") : t("expense.multiPayer")}</button>
+        <button type="button" className="mt-1 text-sm font-bold text-brand-700" onClick={() => setMultiPayer(!multiPayer)}>{multiPayer ? t("expense.singlePayer") : t("expense.multiPayer")}</button>
       </fieldset>
 
       <fieldset className="grid gap-3">
-        <legend className="label">{t("expense.split")}</legend>
-        <div role="tablist" className="flex gap-1 overflow-x-auto rounded-xl bg-white p-1 ring-1 ring-paper-line">
-          {types.map((x) => <button key={x} type="button" role="tab" aria-selected={type === x} onClick={() => { setType(x); setProrated(false); }} className={`min-h-[40px] flex-1 whitespace-nowrap rounded-lg px-2.5 text-sm font-semibold ${type === x ? "bg-brand-600 text-white" : "text-ink-soft"}`}>{t(`split.${x}`)}</button>)}
+        <div className="row">
+          <legend className="label !mb-0">{t("expense.splitWith")}</legend>
+          {type !== "itemized" && <button type="button" className="text-sm font-bold text-brand-700" onClick={() => setIncluded(allOn ? [] : members.map((m) => m.id))}>{allOn ? t("expense.noneAll") : t("expense.everyone")}</button>}
         </div>
-        <p className="muted text-xs">{t(`splitHint.${type}`)}</p>
 
-        {type !== "itemized" ? (
-          <ul className="grid gap-1.5">
+        {type !== "itemized" && (
+          <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {members.map((m) => {
               const on = included.includes(m.id);
-              const share = built.shares?.find((s) => s.memberId === m.id);
+              const share = built.shares?.find((x) => x.memberId === m.id);
               return (
-                <li key={m.id} className={`flex min-h-[52px] items-center gap-3 rounded-xl border px-3 ${on ? "border-paper-line bg-white" : "border-transparent bg-paper opacity-70"}`}>
-                  <label className="flex flex-1 items-center gap-3 text-sm"><input type="checkbox" checked={on} onChange={() => toggle(m.id)} /><span className="font-medium">{m.name}</span></label>
-                  {on && type === "exact" && <input className="input !min-h-[40px] w-28 text-right" inputMode="decimal" aria-label={t("expense.shareOf", { name: m.name })} placeholder="0,00" value={exact[m.id] ?? ""} onChange={(e) => setExact({ ...exact, [m.id]: e.target.value })} />}
-                  {on && type === "percent" && <span className="flex items-center gap-1"><input className="input !min-h-[40px] w-20 text-right" inputMode="decimal" aria-label={t("expense.percentOf", { name: m.name })} placeholder="0" value={percent[m.id] ?? ""} onChange={(e) => setPercent({ ...percent, [m.id]: e.target.value })} /><span className="text-sm">%</span></span>}
-                  {on && type === "shares" && <span className="flex items-center gap-1"><input className="input !min-h-[40px] w-16 text-right" inputMode="numeric" aria-label={t("expense.weightOf", { name: m.name })} value={weights[m.id] ?? "1"} onChange={(e) => setWeights({ ...weights, [m.id]: e.target.value })} /><span className="muted text-xs">{prorated ? t("expense.days") : t("expense.weight")}</span></span>}
-                  {on && share && type !== "exact" && <span className="w-24 text-right text-sm font-semibold">{formatMoney(share.amount, ledgerCurrency)}</span>}
+                <li key={m.id}>
+                  <button type="button" aria-pressed={on} onClick={() => toggle(m.id)}
+                    className={`relative flex w-full flex-col items-center gap-1 rounded-2xl px-1 py-3 transition active:scale-95 ${on ? "bg-white shadow-card ring-2 ring-brand-500" : "bg-paper-sunk opacity-60 ring-1 ring-transparent"}`}>
+                    {on && <span aria-hidden className="absolute right-2 top-2 grid h-5 w-5 place-items-center rounded-full bg-brand-600 text-[11px] font-black text-white">✓</span>}
+                    <Avatar name={m.name} size="md" />
+                    <span className="w-full truncate px-1 text-center text-xs font-bold">{m.id === meId ? t("expense.me") : m.name}</span>
+                    <span className={`text-[13px] font-extrabold ${on ? "text-brand-700" : "text-ink-faint"}`}>{on ? (share ? formatMoney(share.amount, ledgerCurrency) : "—") : t("expense.out")}</span>
+                  </button>
                 </li>
               );
             })}
           </ul>
+        )}
+
+        {!advanced ? (
+          <button type="button" className="btn-secondary btn-sm justify-self-start" onClick={() => setType("exact")}>{t("expense.splitDifferently")}</button>
         ) : (
-          <div className="grid gap-3">
-            {items.map((it, idx) => (
-              <div key={idx} className="card grid gap-2 p-3">
-                <div className="grid grid-cols-[1fr_7rem_auto] gap-2">
-                  <input className="input" aria-label={t("expense.itemName")} placeholder={t("expense.itemName")} maxLength={120} value={it.name} onChange={(e) => setItems(items.map((x, j) => (j === idx ? { ...x, name: e.target.value } : x)))} />
-                  <input className="input text-right" aria-label={t("expense.itemAmount")} inputMode="decimal" placeholder="0,00" value={it.amount} onChange={(e) => setItems(items.map((x, j) => (j === idx ? { ...x, amount: e.target.value } : x)))} />
-                  <button type="button" className="grid h-12 w-10 place-items-center text-ink-mute" aria-label={t("expense.itemRemove")} onClick={() => setItems(items.filter((_, j) => j !== idx))} disabled={items.length === 1}><Trash2 aria-hidden className="h-4 w-4" /></button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {members.map((m) => {
-                    const on = it.members.includes(m.id);
-                    return <button type="button" key={m.id} aria-pressed={on} className={`chip !min-h-[36px] !px-3 text-xs ${on ? "chip-on" : ""}`} onClick={() => setItems(items.map((x, j) => (j === idx ? { ...x, members: on ? x.members.filter((y) => y !== m.id) : [...x.members, m.id] } : x)))}>{m.name}</button>;
-                  })}
-                </div>
-              </div>
-            ))}
-            <button type="button" className="btn-secondary btn-sm justify-self-start" onClick={() => setItems([...items, { name: "", amount: "", members: all }])}><Plus aria-hidden className="h-4 w-4" />{t("expense.itemAdd")}</button>
-            <div className="grid grid-cols-3 gap-2">
-              {(["discount", "service", "tip"] as const).map((k) => <Field key={k} label={t(`expense.${k}`)}><input className="input" inputMode="decimal" placeholder="0,00" value={extras[k]} onChange={(e) => setExtras({ ...extras, [k]: e.target.value })} /></Field>)}
+          <div className="card grid gap-3 !p-4">
+            <div className="row"><p className="text-sm font-bold">{t("expense.splitHow")}</p><button type="button" className="text-sm font-bold text-brand-700" onClick={() => { setType("equal"); setProrated(false); }}>{t("expense.backToEqual")}</button></div>
+            <div role="tablist" className="grid grid-cols-4 gap-1 rounded-2xl bg-paper-sunk p-1">
+              {types.filter((x) => x !== "equal").map((x) => <button key={x} type="button" role="tab" aria-selected={type === x} onClick={() => { setType(x); setProrated(false); }} className={`min-h-[40px] rounded-xl px-1 text-[13px] font-bold transition ${type === x ? "bg-white text-ink shadow-card" : "text-ink-mute"}`}>{t(`split.${x}`)}</button>)}
             </div>
-            <Field label={t("expense.extrasMode")}><select className="input" value={extras.mode} onChange={(e) => setExtras({ ...extras, mode: e.target.value as "proportional" | "equal" })}><option value="proportional">{t("expense.extrasProportional")}</option><option value="equal">{t("expense.extrasEqual")}</option></select></Field>
-            <Field label={t("expense.currency")}><select className="input" value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCY_CODES.map((c) => <option key={c}>{c}</option>)}</select></Field>
+            <p className="muted text-xs">{t(`splitHint.${type}`)}</p>
+            {type !== "itemized" ? (
+              <ul className="grid gap-2">
+                {members.filter((m) => included.includes(m.id)).map((m) => {
+                  const share = built.shares?.find((x) => x.memberId === m.id);
+                  return (
+                    <li key={m.id} className="flex items-center gap-3">
+                      <Avatar name={m.name} size="sm" /><span className="flex-1 truncate text-sm font-semibold">{m.name}</span>
+                      {type === "exact" && <input className="input !min-h-[44px] w-28 text-right" inputMode="decimal" aria-label={t("expense.shareOf", { name: m.name })} placeholder="0,00" value={exact[m.id] ?? ""} onChange={(e) => setExact({ ...exact, [m.id]: e.target.value })} />}
+                      {type === "percent" && <span className="flex items-center gap-1"><input className="input !min-h-[44px] w-20 text-right" inputMode="decimal" aria-label={t("expense.percentOf", { name: m.name })} placeholder="0" value={percent[m.id] ?? ""} onChange={(e) => setPercent({ ...percent, [m.id]: e.target.value })} /><span className="text-sm font-bold">%</span></span>}
+                      {type === "shares" && <span className="flex items-center gap-1"><input className="input !min-h-[44px] w-16 text-right" inputMode="numeric" aria-label={t("expense.weightOf", { name: m.name })} value={weights[m.id] ?? "1"} onChange={(e) => setWeights({ ...weights, [m.id]: e.target.value })} /><span className="muted text-xs">{prorated ? t("expense.days") : t("expense.weight")}</span></span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="grid gap-3">
+                {items.map((it, idx) => (
+                  <div key={idx} className="grid gap-2 rounded-2xl bg-paper p-3">
+                    <div className="grid grid-cols-[1fr_7rem_auto] gap-2">
+                      <input className="input !min-h-[44px]" aria-label={t("expense.itemName")} placeholder={t("expense.itemName")} maxLength={120} value={it.name} onChange={(e) => setItems(items.map((x, j) => (j === idx ? { ...x, name: e.target.value } : x)))} />
+                      <input className="input !min-h-[44px] text-right" aria-label={t("expense.itemAmount")} inputMode="decimal" placeholder="0,00" value={it.amount} onChange={(e) => setItems(items.map((x, j) => (j === idx ? { ...x, amount: e.target.value } : x)))} />
+                      <button type="button" className="grid h-11 w-9 place-items-center text-ink-mute" aria-label={t("expense.itemRemove")} onClick={() => setItems(items.filter((_, j) => j !== idx))} disabled={items.length === 1}><Trash2 aria-hidden className="h-4 w-4" /></button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {members.map((m) => {
+                        const on = it.members.includes(m.id);
+                        return <button type="button" key={m.id} aria-pressed={on} className={`chip !min-h-[36px] !px-3 text-xs ${on ? "chip-on" : ""}`} onClick={() => setItems(items.map((x, j) => (j === idx ? { ...x, members: on ? x.members.filter((y) => y !== m.id) : [...x.members, m.id] } : x)))}>{m.name}</button>;
+                      })}
+                    </div>
+                  </div>
+                ))}
+                <button type="button" className="btn-secondary btn-sm justify-self-start" onClick={() => setItems([...items, { name: "", amount: "", members: all }])}><Plus aria-hidden className="h-4 w-4" />{t("expense.itemAdd")}</button>
+                <div className="grid grid-cols-3 gap-2">
+                  {(["discount", "service", "tip"] as const).map((k) => <Field key={k} label={t(`expense.${k}`)}><input className="input" inputMode="decimal" placeholder="0,00" value={extras[k]} onChange={(e) => setExtras({ ...extras, [k]: e.target.value })} /></Field>)}
+                </div>
+                <Field label={t("expense.extrasMode")}><select className="input" value={extras.mode} onChange={(e) => setExtras({ ...extras, mode: e.target.value as "proportional" | "equal" })}><option value="proportional">{t("expense.extrasProportional")}</option><option value="equal">{t("expense.extrasEqual")}</option></select></Field>
+                <Field label={t("expense.currency")}><select className="input" value={currency} onChange={(e) => setCurrency(e.target.value)}>{CURRENCY_CODES.map((c) => <option key={c}>{c}</option>)}</select></Field>
+                {built.shares && <ul className="grid gap-1 rounded-2xl bg-brand-50 p-3 text-sm">{built.shares.map((x) => <li key={x.memberId} className="row"><span>{name(x.memberId)}</span><b>{formatMoney(x.amount, ledgerCurrency)}</b></li>)}</ul>}
+              </div>
+            )}
           </div>
         )}
+        {built.shares?.some((x) => x.rounding !== 0) && <p className="px-1 text-xs text-ink-mute">{t("expense.roundingShort")}</p>}
       </fieldset>
 
-      {built.shares ? (
-        <section aria-live="polite" className="rounded-2xl border border-brand-600/25 bg-brand-50 p-4">
-          <div className="row"><p className="text-sm font-bold text-brand-800">{t("expense.preview")}</p><p className="text-lg font-extrabold text-brand-800">{formatMoney(built.input!.amount, ledgerCurrency)}</p></div>
-          <ul className="mt-2 grid gap-1 text-sm">
-            {built.shares.map((s) => <li key={s.memberId} className="row"><span>{name(s.memberId)}</span><span className="font-semibold">{formatMoney(s.amount, ledgerCurrency)}{s.rounding !== 0 && <sup title={t("expense.roundingTitle")}> *</sup>}</span></li>)}
-          </ul>
-          {built.shares.some((s) => s.rounding !== 0) && <p className="mt-2 text-xs text-brand-800">* {t("expense.roundingNote")}</p>}
-        </section>
-      ) : <p className="muted text-sm" aria-live="polite">{built.problem}</p>}
-
-      <details className="card" open={!!note || period.on}>
-        <summary className="cursor-pointer text-sm font-semibold">{t("expense.more")}</summary>
+      <details className="card !p-4" open={!!note || period.on}>
+        <summary className="cursor-pointer text-sm font-bold text-ink-soft">{t("expense.more")}</summary>
         <div className="mt-4 grid gap-4">
           <Field label={t("expense.date")}><input className="input" type="date" required value={date} onChange={(e) => setDate(e.target.value)} /></Field>
-          <Field label={t("expense.note")}><textarea className="input min-h-[80px] py-2.5" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
+          <Field label={t("expense.note")}><textarea className="input min-h-[80px] py-3" maxLength={1000} value={note} onChange={(e) => setNote(e.target.value)} /></Field>
           {groupType === "home" && (
             <div className="grid gap-3">
               <label className="flex items-start gap-3 text-sm"><input type="checkbox" checked={period.on} onChange={(e) => setPeriod({ ...period, on: e.target.checked })} /><span><b>{t("expense.period")}</b><span className="muted block">{t("expense.periodBody")}</span></span></label>
@@ -254,8 +298,17 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
         </div>
       </details>
 
-      <ErrorText>{error}</ErrorText>
-      <button className="btn-primary" disabled={pending}>{pending ? t("common.wait") : initial ? t("common.save") : t("expense.submit")}</button>
+      <div className="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-paper via-paper/95 to-paper/0 px-4 pt-6" style={{ paddingBottom: "max(14px, env(safe-area-inset-bottom))" }}>
+        <div className="mx-auto grid max-w-xl gap-2">
+          <ErrorText>{error}</ErrorText>
+          <button className="btn-primary w-full min-h-[56px] text-base" disabled={pending}>
+            {pending ? t("common.wait") : built.input ? (
+              <span className="flex w-full items-center justify-between gap-3"><span>{initial ? t("common.save") : t("expense.submit")}</span><span className="rounded-full bg-white/20 px-3 py-1 text-sm">{perHead != null && built.shares!.length > 1 ? t("expense.perHead", { amount: formatMoney(perHead, ledgerCurrency) }) : formatMoney(built.input.amount, ledgerCurrency)}</span></span>
+            ) : (initial ? t("common.save") : t("expense.submit"))}
+          </button>
+          {!built.input && built.problem && <p className="rounded-xl bg-white/95 px-3 py-1.5 text-center text-xs font-semibold text-ink-mute shadow-card" aria-live="polite">{built.problem}</p>}
+        </div>
+      </div>
     </form>
   );
 }

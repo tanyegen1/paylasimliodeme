@@ -87,9 +87,10 @@ export async function getGroupContext(groupId: string, userId: string) {
 }
 
 export async function listGroups(userId: string) {
-  return q<Group & { member_count: number; my_member_id: string; last_activity: Date }>(
+  return q<Group & { member_count: number; my_member_id: string; last_activity: Date; member_names: string[] }>(
     `select g.*, m.id as my_member_id,
        (select count(*)::int from members x where x.group_id=g.id and x.status='active') as member_count,
+       (select coalesce(array_agg(x.display_name order by x.position, x.joined_at), '{}') from members x where x.group_id=g.id and x.status='active') as member_names,
        greatest(g.created_at, coalesce((select max(created_at) from audit_events a where a.group_id=g.id), g.created_at)) as last_activity
      from groups g join members m on m.group_id=g.id and m.user_id=$1 and m.status='active'
      order by g.archived_at nulls first, last_activity desc`, [userId]);
