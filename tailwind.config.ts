@@ -1,7 +1,10 @@
 import type { Config } from "tailwindcss";
 
+/** Renkler src/config/themes.ts içindeki temalardan CSS değişkeni olarak gelir. */
+const v = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 /**
- * Renk sistemi (3 katman):
+ * Renk sistemi (3 katman, her tema için aynı roller):
  *  - brand: zümrüt/turkuaz vurgu (az piksel, ana eylemler)
  *  - ink/paper: lacivert tonlu nötrler (arayüzün çoğu)
  *  - warm/danger/sky: anlamsal destek renkleri (borç, hata, bilgi) — her zaman metinle birlikte
@@ -11,23 +14,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: { DEFAULT: "#0F1F33", soft: "#3E4C5E", mute: "#647186", faint: "#94A0B2" },
-        paper: { DEFAULT: "#F3F6F4", card: "#FFFFFF", line: "#E3E9E5", sunk: "#EDF2EF" },
-        brand: {
-          50: "#E7F7F1", 100: "#C8EEDF", 200: "#9FDFC8", 300: "#6CCBAC", 400: "#36B38F",
-          500: "#12997A", 600: "#0B8466", 700: "#086B53", 800: "#075442", 900: "#063F33",
-        },
-        warm: { 50: "#FFF4E5", 100: "#FFE3BF", 200: "#FFD39A", 600: "#B25E09", 700: "#8F4A06" },
-        danger: { 50: "#FDECEC", 600: "#B3261E" },
+        ink: { DEFAULT: v("ink"), soft: v("ink-soft"), mute: v("ink-mute"), faint: v("ink-faint") },
+        paper: { DEFAULT: v("paper"), card: v("paper-card"), line: v("paper-line"), sunk: v("paper-sunk") },
+        brand: Object.fromEntries(["50", "100", "200", "300", "400", "500", "600", "700", "800", "900"].map((k) => [k, v(`brand-${k}`)])),
+        warm: { 50: v("warm-50"), 100: v("warm-100"), 200: v("warm-200"), 600: v("warm-600"), 700: v("warm-700") },
+        danger: { 50: v("danger-50"), 600: v("danger-600") },
+        sky: { 50: v("sky-50"), 100: v("sky-100"), 700: v("sky-700"), 800: v("sky-800"), 900: v("sky-900") },
+        violet: { 50: v("violet-50"), 700: v("violet-700") },
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans Variable"', "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
       },
       borderRadius: { xl: "0.875rem", "2xl": "1.25rem", "3xl": "1.75rem" },
       boxShadow: {
-        card: "0 1px 2px rgba(15,31,51,.04), 0 6px 20px -8px rgba(15,31,51,.10)",
-        lift: "0 10px 30px -10px rgba(11,132,102,.45)",
-        nav: "0 -1px 0 rgba(15,31,51,.04), 0 -8px 30px -12px rgba(15,31,51,.18)",
+        card: "0 1px 2px rgb(0 0 0 / .04), 0 6px 20px -8px rgb(0 0 0 / .12)",
+        lift: "0 10px 30px -10px rgb(var(--brand-600) / .45)",
+        nav: "0 -1px 0 rgb(0 0 0 / .04), 0 -8px 30px -12px rgb(0 0 0 / .25)",
       },
       keyframes: {
         rise: { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "none" } },

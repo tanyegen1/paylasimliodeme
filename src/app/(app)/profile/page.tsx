@@ -6,6 +6,7 @@ import { PLANS } from "@/config/plans";
 import { Badge, Header, Page } from "@/components/ui";
 import { logoutAction } from "@/app/actions";
 import { brand } from "@/config/brand";
+import { ThemePicker } from "@/components/theme-picker";
 import { t } from "@/lib/i18n";
 import { DangerZone, PasswordForm, PrefsForm, ProfileForm, SecureForm } from "./forms";
 
@@ -28,6 +29,7 @@ export default async function ProfilePage() {
         {!user.is_guest && <p className="muted mb-3">{user.email}</p>}
         <ProfileForm initial={{ name: user.display_name, iban: user.iban ?? "", ibanHolder: user.iban_holder ?? "", marketing: user.marketing_opt_in }} />
       </section>
+      <section className="card mt-4"><h2 className="mb-1">{t("theme.title")}</h2><p className="muted mb-4">{t("theme.lead")}</p><ThemePicker /></section>
       <section className="card mt-4"><h2 className="mb-1">{t("profile.notifications")}</h2><p className="muted mb-3">{t("profile.notificationsBody")}</p><PrefsForm initial={prefs} /></section>
       <section className="card mt-4">
         <div className="row"><h2>{t("premium.title")}</h2><Badge tone={plan === "premium" ? "ok" : "neutral"}>{plan === "premium" ? t("premium.active") : t("premium.free")}</Badge></div>

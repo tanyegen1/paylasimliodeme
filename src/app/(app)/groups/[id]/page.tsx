@@ -73,13 +73,13 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
   return (
     <Page>
       <header className="mb-5 flex items-center gap-3">
-        <Link href="/groups" aria-label={t("common.back")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95"><ChevronRight aria-hidden className="h-5 w-5 rotate-180" /></Link>
+        <Link href="/groups" aria-label={t("common.back")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper-card text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95"><ChevronRight aria-hidden className="h-5 w-5 rotate-180" /></Link>
         <span aria-hidden className={`grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-2xl ${GROUP_TILE[group.type]}`}>{GROUP_EMOJI[group.type]}</span>
         <div className="min-w-0 flex-1">
           <h1 className="truncate !text-[1.35rem]">{group.name}</h1>
           <div className="mt-0.5 flex items-center gap-2"><AvatarStack names={active.map((m) => m.display_name)} max={5} /><span className="whitespace-nowrap text-xs font-semibold text-ink-mute">{t("groups.members", { n: active.length })}</span>{group.is_demo && <Badge tone="warn">DEMO</Badge>}</div>
         </div>
-        <Link href={`/groups/${id}?tab=settings`} aria-label={t("settings.title")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95"><Settings aria-hidden className="h-5 w-5" /></Link>
+        <Link href={`/groups/${id}?tab=settings`} aria-label={t("settings.title")} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper-card text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95"><Settings aria-hidden className="h-5 w-5" /></Link>
       </header>
       {group.archived_at && <div className="mb-3"><Notice tone="warn">{t("group.archivedNote")}</Notice></div>}
 
@@ -92,7 +92,7 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
           <p className="mt-1.5 text-2xl font-extrabold">{t("balance.settledLong")}</p>
         ) : (
           myNets.map(([c, v]) => (
-            <p key={c} className="mt-1"><span className={`text-sm font-bold ${v > 0 ? "text-brand-100" : "text-warm-200"}`}>{v > 0 ? t("balance.youAreOwed") : t("balance.youOwe")}</span><span className="block text-[2.1rem] font-extrabold leading-tight">{formatMoney(Math.abs(v), c)}</span></p>
+            <p key={c} className="mt-1"><span className={`text-sm font-bold ${v > 0 ? "text-white/85" : "text-warm-200"}`}>{v > 0 ? t("balance.youAreOwed") : t("balance.youOwe")}</span><span className="block text-[2.1rem] font-extrabold leading-tight">{formatMoney(Math.abs(v), c)}</span></p>
           ))
         )}
         {myTransfers.length > 0 && (
@@ -143,7 +143,7 @@ export default async function GroupPage({ params, searchParams }: { params: Prom
       <nav aria-label={t("group.tabs")} className="sticky top-0 z-10 -mx-4 mt-6 bg-paper/90 px-4 py-2 backdrop-blur">
         <ul className="grid grid-cols-3 gap-1 rounded-2xl bg-paper-sunk p-1">
           {TABS.map((x) => (
-            <li key={x}><Link href={`/groups/${id}?tab=${x}`} aria-current={tab === x ? "page" : undefined} className={`flex min-h-[42px] items-center justify-center rounded-xl text-sm font-bold transition ${tab === x ? "bg-white text-ink shadow-card" : "text-ink-mute"}`}>{t(`group.tab_${x}`)}</Link></li>
+            <li key={x}><Link href={`/groups/${id}?tab=${x}`} aria-current={tab === x ? "page" : undefined} className={`flex min-h-[42px] items-center justify-center rounded-xl text-sm font-bold transition ${tab === x ? "bg-paper-card text-ink shadow-card" : "text-ink-mute"}`}>{t(`group.tab_${x}`)}</Link></li>
           ))}
         </ul>
       </nav>

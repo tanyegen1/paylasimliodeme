@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Wordmark } from "@/components/wordmark";
 import { getPayLink, syncOpenAttemptsForToken } from "@/server/payments";
 import { getUser } from "@/server/session";
 import { brand } from "@/config/brand";
@@ -19,7 +20,7 @@ export default async function PayPage({ params }: { params: Promise<{ token: str
   const user = await getUser();
   return (
     <main className="rise mx-auto max-w-xl px-5 pb-16 pt-8">
-      <p className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-brand-700"><span aria-hidden className="grid h-8 w-8 place-items-center rounded-xl bg-brand-600 text-sm text-white">₺</span>{brand.name}</p>
+      <Wordmark href={null} />
       {!link ? (
         <div className="card mt-8 text-center"><p aria-hidden className="text-4xl">🔗</p><h1 className="mt-2 text-xl">{t("pay.invalid")}</h1><p className="muted mt-2">{t("pay.invalidBody")}</p></div>
       ) : (

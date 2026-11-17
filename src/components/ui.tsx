@@ -11,7 +11,7 @@ export function Header({ title, back, action, subtitle, eyebrow }: { title: stri
   return (
     <header className="mb-5 flex items-start gap-2">
       {back && (
-        <Link href={back} aria-label={t("common.back")} className="-ml-1 mt-0.5 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95">
+        <Link href={back} aria-label={t("common.back")} className="-ml-1 mt-0.5 grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper-card text-ink-soft shadow-card ring-1 ring-paper-line transition active:scale-95">
           <ChevronLeft aria-hidden className="h-5 w-5" />
         </Link>
       )}
@@ -38,7 +38,7 @@ export function avatarTone(name: string) {
 export function Avatar({ name, size = "md", ring = false }: { name: string; size?: "xs" | "sm" | "md" | "lg"; ring?: boolean }) {
   const s = { xs: "h-7 w-7 text-[11px]", sm: "h-9 w-9 text-xs", md: "h-11 w-11 text-sm", lg: "h-14 w-14 text-lg" }[size];
   return (
-    <span aria-hidden className={`grid shrink-0 place-items-center rounded-full font-extrabold ${avatarTone(name)} ${s} ${ring ? "ring-[3px] ring-white" : ""}`}>
+    <span aria-hidden className={`grid shrink-0 place-items-center rounded-full font-extrabold ${avatarTone(name)} ${s} ${ring ? "ring-[3px] ring-paper-card" : ""}`}>
       {name.trim().charAt(0).toLocaleUpperCase("tr") || "?"}
     </span>
   );
@@ -48,7 +48,7 @@ export function AvatarStack({ names, max = 4 }: { names: string[]; max?: number 
   return (
     <span className="flex -space-x-2" aria-label={names.join(", ")}>
       {shown.map((n, i) => <Avatar key={i} name={n} size="xs" ring />)}
-      {names.length > max && <span className="grid h-7 w-7 place-items-center rounded-full bg-paper-sunk text-[11px] font-bold text-ink-soft ring-[3px] ring-white">+{names.length - max}</span>}
+      {names.length > max && <span className="grid h-7 w-7 place-items-center rounded-full bg-paper-sunk text-[11px] font-bold text-ink-soft ring-[3px] ring-paper-card">+{names.length - max}</span>}
     </span>
   );
 }

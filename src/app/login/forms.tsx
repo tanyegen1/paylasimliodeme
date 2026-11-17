@@ -30,7 +30,7 @@ export function AuthForms({ next, initial, demoUsers }: { next: string; initial:
       <div role="tablist" className="mt-6 grid grid-cols-3 gap-1 rounded-2xl bg-paper-sunk p-1">
         {tabs.map((m) => (
           <button key={m} role="tab" aria-selected={mode === m} type="button" onClick={() => { setMode(m); setError(null); }}
-            className={`min-h-[42px] rounded-xl text-sm font-bold transition ${mode === m ? "bg-white text-ink shadow-card" : "text-ink-mute"}`}>{t(`auth.tab_${m}`)}</button>
+            className={`min-h-[42px] rounded-xl text-sm font-bold transition ${mode === m ? "bg-paper-card text-ink shadow-card" : "text-ink-mute"}`}>{t(`auth.tab_${m}`)}</button>
         ))}
       </div>
       <form onSubmit={submit} className="mt-5 grid gap-4">

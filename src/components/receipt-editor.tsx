@@ -84,7 +84,7 @@ export function ReceiptEditor({ groupId, members, meId, groupCurrency, today, oc
       <section className="grid gap-2">
         <h2 className="text-sm font-bold">{t("receipt.items")}</h2>
         {items.map((it, idx) => (
-          <div key={idx} className={`grid gap-2 rounded-xl border bg-white p-2.5 ${it.uncertain ? "border-warm-600/50" : "border-paper-line"}`}>
+          <div key={idx} className={`grid gap-2 rounded-xl border bg-paper-card p-2.5 ${it.uncertain ? "border-warm-600/50" : "border-paper-line"}`}>
             <div className="grid grid-cols-[1fr_3.5rem_6.5rem_auto] gap-1.5">
               <input className="input !min-h-[44px]" aria-label={t("expense.itemName")} placeholder={t("expense.itemName")} maxLength={120} value={it.name} onChange={(e) => upd(idx, { name: e.target.value })} />
               <input className="input !min-h-[44px] px-2 text-center" aria-label={t("receipt.qty")} inputMode="decimal" value={it.quantity} onChange={(e) => upd(idx, { quantity: e.target.value })} />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Wordmark } from "@/components/wordmark";
 import { getUser } from "@/server/session";
 import { previewInvite, trackInviteOpened } from "@/server/invites";
 import { brand } from "@/config/brand";
@@ -17,7 +18,7 @@ export default async function JoinPage({ params }: { params: Promise<{ token: st
   if (pre.state === "ok") await trackInviteOpened(token);
   return (
     <main className="rise mx-auto max-w-xl px-5 pb-16 pt-8">
-      <p className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-brand-700"><span aria-hidden className="grid h-8 w-8 place-items-center rounded-xl bg-brand-600 text-sm text-white">₺</span>{brand.name}</p>
+      <Wordmark href={null} />
       {pre.state !== "ok" ? (
         <div className="card mt-8 text-center">
           <p aria-hidden className="text-4xl">🔗</p>

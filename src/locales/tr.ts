@@ -338,6 +338,12 @@ export const tr = {
     feesTitle: "Ödeme işlem ücretleri ayrıdır", feesBody: "İleride uygulama içi ödeme açılırsa, sağlayıcının işlem ücreti abonelikten bağımsızdır ve her ödemede onaydan önce gösterilir.",
     notYetTitle: "Satın alma henüz açık değil", notYetBody: "Abonelik altyapısı bağlanmadı; fiyat belirlenmedi. Bu sayfadan satın alma yapılamaz.", cta: "Premium yakında",
   },
+  theme: {
+    title: "Görünüm", lead: "Uygulamanın rengini seç. Seçimin bu cihazda hatırlanır.", note: "Seçimin bu cihazda hatırlanır. Tutarlar ve durumlar her temada aynı anlamı taşır; renk tek başına anlam vermez.",
+    emerald: "Zümrüt", emerald_hint: "Açık · varsayılan", night: "Gece", night_hint: "Koyu",
+    sky: "Gökyüzü", sky_hint: "Açık mavi", lavender: "Lavanta", lavender_hint: "Mor",
+    coral: "Mercan", coral_hint: "Sıcak, açık", auto: "Otomatik", auto_hint: "Cihaza göre açık/koyu",
+  },
   notFound: { title: "Aradığın sayfa burada değil", body: "Bağlantı eski olabilir ya da bu içeriğe erişimin olmayabilir." },
   errors: {
     generic: "Bir şeyler ters gitti. Biraz sonra tekrar dener misin?", network: "Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.",

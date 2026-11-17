@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Wordmark } from "@/components/wordmark";
+import { ThemeButton } from "@/components/theme-picker";
 import { ArrowRight, Bell, ChevronRight, Link2, Plus, ReceiptText, Scale } from "lucide-react";
 import { getUser } from "@/server/session";
 import { getHomeSummary } from "@/server/ledger";
@@ -33,9 +35,9 @@ export default async function HomePage() {
             <p className="text-[15px] font-semibold text-ink-mute">{t("home.hello", { name: firstName(user.display_name) })} 👋</p>
             <h1 className="mt-0.5">{active.length ? t("home.headline") : t("home.headlineNew")}</h1>
           </div>
-          <Link href="/activity" aria-label={t("home.notifications")} className="relative grid h-12 w-12 place-items-center rounded-full bg-white shadow-card ring-1 ring-paper-line transition active:scale-95">
+          <Link href="/activity" aria-label={t("home.notifications")} className="relative grid h-12 w-12 place-items-center rounded-full bg-paper-card shadow-card ring-1 ring-paper-line transition active:scale-95">
             <Bell aria-hidden className="h-5 w-5" />
-            {unread > 0 && <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-warm-600 ring-2 ring-white" />}
+            {unread > 0 && <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-warm-600 ring-2 ring-paper-card" />}
           </Link>
         </header>
 
@@ -44,7 +46,7 @@ export default async function HomePage() {
             <p aria-hidden className="text-5xl">🧾✨</p>
             <h2 className="mt-4 text-2xl font-extrabold text-white">{t("home.emptyTitle")}</h2>
             <p className="mt-2 text-[15px] leading-relaxed text-white/80">{t("home.emptyBody")}</p>
-            <Link href="/groups/new" className="btn mt-5 w-full bg-white text-brand-800 hover:bg-brand-50">{t("home.createFirst")} <ArrowRight aria-hidden className="h-5 w-5" /></Link>
+            <Link href="/groups/new" className="btn mt-5 w-full bg-paper-card text-brand-800 hover:bg-brand-50">{t("home.createFirst")} <ArrowRight aria-hidden className="h-5 w-5" /></Link>
           </section>
         ) : (
           <section aria-label={t("home.totals")} className="hero">
@@ -55,7 +57,7 @@ export default async function HomePage() {
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-2.5">
                 <div className="hero-glass p-3.5">
-                  <p className="text-[12px] font-bold text-brand-100">{t("home.owedToYou")}</p>
+                  <p className="text-[12px] font-bold text-white/85">{t("home.owedToYou")}</p>
                   {(owed.length ? owed : [currencies[0] ?? "TRY"]).map((c) => <p key={c} className="mt-0.5 text-[1.35rem] font-extrabold leading-tight">{formatMoney(totals[c]?.owed ?? 0, c)}</p>)}
                 </div>
                 <div className="hero-glass p-3.5">
@@ -103,7 +105,7 @@ export default async function HomePage() {
         )}
 
         {user.is_guest && active.length > 0 && (
-          <Link href="/profile#secure" className="mt-5 flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 text-sm shadow-card ring-1 ring-paper-line">
+          <Link href="/profile#secure" className="mt-5 flex items-center gap-3 rounded-2xl bg-paper-card px-4 py-3.5 text-sm shadow-card ring-1 ring-paper-line">
             <span aria-hidden className="grid h-10 w-10 place-items-center rounded-full bg-brand-50 text-lg">🔐</span>
             <span className="flex-1"><b>{t("home.secureTitle")}</b> <span className="text-ink-mute">{t("home.secureBody")}</span></span>
             <ChevronRight aria-hidden className="h-5 w-5 text-ink-faint" />
@@ -154,7 +156,7 @@ function Landing() {
   const people = [{ n: "Ece", a: "₺620,25", ok: true }, { n: "Can", a: "₺620,25", ok: false }, { n: "Defne", a: "₺620,25", ok: true }];
   return (
     <main className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 pb-10 pt-8">
-      <p className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-brand-700"><span aria-hidden className="grid h-8 w-8 place-items-center rounded-xl bg-brand-600 text-sm text-white">₺</span>{brand.name}</p>
+      <div className="row"><Wordmark /><ThemeButton /></div>
       <h1 className="mt-8 text-[2.4rem] font-extrabold leading-[1.05] tracking-tight">{t("landing.h1a")}<br /><span className="bg-gradient-to-r from-brand-500 to-brand-800 bg-clip-text text-transparent">{t("landing.h1b")}</span></h1>
       <p className="mt-4 text-[17px] leading-relaxed text-ink-soft">{t("landing.lead")}</p>
 
@@ -174,7 +176,7 @@ function Landing() {
             ))}
           </ul>
         </div>
-        <div className="absolute -right-2 -top-4 animate-pop rounded-2xl bg-white px-3 py-2 text-sm font-extrabold shadow-card ring-1 ring-paper-line [animation-delay:300ms]">💸 Ödeşildi!</div>
+        <div className="absolute -right-2 -top-4 animate-pop rounded-2xl bg-paper-card px-3 py-2 text-sm font-extrabold shadow-card ring-1 ring-paper-line [animation-delay:300ms]">💸 Ödeşildi!</div>
       </div>
 
       <div className="mt-8 grid gap-2.5">

@@ -44,7 +44,7 @@ export function NewGroupForm({ inviterName }: { inviterName: string }) {
           <p className="mt-1 text-[15px] text-white/80">{t("newGroup.doneBody")}</p>
         </div>
         <div className="card grid gap-3">
-          <p className="rounded-2xl bg-[#E7F7EC] px-4 py-3 text-[15px] leading-relaxed text-ink">{text}</p>
+          <p className="rounded-2xl bg-brand-50 px-4 py-3 text-[15px] leading-relaxed text-ink">{text}</p>
           <ShareRow text={text} groupId={created.id} />
           <p className="muted text-xs">{t("newGroup.linkNote")}</p>
         </div>
@@ -65,7 +65,7 @@ export function NewGroupForm({ inviterName }: { inviterName: string }) {
         <div className="grid grid-cols-5 gap-2">
           {GROUP_TYPE_LIST.map((v) => (
             <button type="button" key={v} aria-pressed={type === v} onClick={() => pickType(v)}
-              className={`flex min-h-[86px] flex-col items-center justify-center gap-1.5 rounded-2xl text-xs font-bold transition active:scale-95 ${type === v ? "bg-white text-ink shadow-card ring-2 ring-brand-500" : "bg-white/60 text-ink-mute ring-1 ring-paper-line"}`}>
+              className={`flex min-h-[86px] flex-col items-center justify-center gap-1.5 rounded-2xl text-xs font-bold transition active:scale-95 ${type === v ? "bg-paper-card text-ink shadow-card ring-2 ring-brand-500" : "bg-paper-card/60 text-ink-mute ring-1 ring-paper-line"}`}>
               <span aria-hidden className={`grid h-11 w-11 place-items-center rounded-xl text-2xl ${GROUP_TILE[v]}`}>{GROUP_EMOJI[v]}</span>{t(`groupTypeShort.${v}`)}
             </button>
           ))}

@@ -180,7 +180,7 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
               const on = payer === m.id;
               return (
                 <button type="button" key={m.id} aria-pressed={on} onClick={() => setPayer(m.id)}
-                  className={`flex w-[74px] flex-col items-center gap-1.5 rounded-2xl px-1 py-2.5 text-xs font-bold transition active:scale-95 ${on ? "bg-brand-600 text-white shadow-lift" : "bg-white text-ink-soft ring-1 ring-paper-line"}`}>
+                  className={`flex w-[74px] flex-col items-center gap-1.5 rounded-2xl px-1 py-2.5 text-xs font-bold transition active:scale-95 ${on ? "bg-brand-600 text-white shadow-lift" : "bg-paper-card text-ink-soft ring-1 ring-paper-line"}`}>
                   <Avatar name={m.name} size="md" ring={on} />
                   <span className="w-full truncate">{m.id === meId ? t("expense.me") : m.name}</span>
                 </button>
@@ -210,7 +210,7 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
               return (
                 <li key={m.id}>
                   <button type="button" aria-pressed={on} onClick={() => toggle(m.id)}
-                    className={`relative flex w-full flex-col items-center gap-1 rounded-2xl px-1 py-3 transition active:scale-95 ${on ? "bg-white shadow-card ring-2 ring-brand-500" : "bg-paper-sunk opacity-60 ring-1 ring-transparent"}`}>
+                    className={`relative flex w-full flex-col items-center gap-1 rounded-2xl px-1 py-3 transition active:scale-95 ${on ? "bg-paper-card shadow-card ring-2 ring-brand-500" : "bg-paper-sunk opacity-60 ring-1 ring-transparent"}`}>
                     {on && <span aria-hidden className="absolute right-2 top-2 grid h-5 w-5 place-items-center rounded-full bg-brand-600 text-[11px] font-black text-white">✓</span>}
                     <Avatar name={m.name} size="md" />
                     <span className="w-full truncate px-1 text-center text-xs font-bold">{m.id === meId ? t("expense.me") : m.name}</span>
@@ -228,7 +228,7 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
           <div className="card grid gap-3 !p-4">
             <div className="row"><p className="text-sm font-bold">{t("expense.splitHow")}</p><button type="button" className="text-sm font-bold text-brand-700" onClick={() => { setType("equal"); setProrated(false); }}>{t("expense.backToEqual")}</button></div>
             <div role="tablist" className="grid grid-cols-4 gap-1 rounded-2xl bg-paper-sunk p-1">
-              {types.filter((x) => x !== "equal").map((x) => <button key={x} type="button" role="tab" aria-selected={type === x} onClick={() => { setType(x); setProrated(false); }} className={`min-h-[40px] rounded-xl px-1 text-[13px] font-bold transition ${type === x ? "bg-white text-ink shadow-card" : "text-ink-mute"}`}>{t(`split.${x}`)}</button>)}
+              {types.filter((x) => x !== "equal").map((x) => <button key={x} type="button" role="tab" aria-selected={type === x} onClick={() => { setType(x); setProrated(false); }} className={`min-h-[40px] rounded-xl px-1 text-[13px] font-bold transition ${type === x ? "bg-paper-card text-ink shadow-card" : "text-ink-mute"}`}>{t(`split.${x}`)}</button>)}
             </div>
             <p className="muted text-xs">{t(`splitHint.${type}`)}</p>
             {type !== "itemized" ? (
@@ -306,7 +306,7 @@ export function ExpenseForm({ groupId, groupType, groupCurrency, members, meId, 
               <span className="flex w-full items-center justify-between gap-3"><span>{initial ? t("common.save") : t("expense.submit")}</span><span className="rounded-full bg-white/20 px-3 py-1 text-sm">{perHead != null && built.shares!.length > 1 ? t("expense.perHead", { amount: formatMoney(perHead, ledgerCurrency) }) : formatMoney(built.input.amount, ledgerCurrency)}</span></span>
             ) : (initial ? t("common.save") : t("expense.submit"))}
           </button>
-          {!built.input && built.problem && <p className="rounded-xl bg-white/95 px-3 py-1.5 text-center text-xs font-semibold text-ink-mute shadow-card" aria-live="polite">{built.problem}</p>}
+          {!built.input && built.problem && <p className="rounded-xl bg-paper-card/95 px-3 py-1.5 text-center text-xs font-semibold text-ink-mute shadow-card" aria-live="polite">{built.problem}</p>}
         </div>
       </div>
     </form>

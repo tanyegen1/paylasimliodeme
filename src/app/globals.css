@@ -3,8 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  /* Uygulama yalnızca açık temada tasarlandı; tarayıcının otomatik karartması kontrastı bozmasın. */
-  :root { color-scheme: light; }
+  /* Tema değişkenleri ve color-scheme src/config/themes.ts'ten <head> içine yazılır. */
   html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
   body { @apply bg-paper text-ink antialiased; font-feature-settings: "tnum" 1; }
   h1 { @apply text-[1.65rem] font-extrabold leading-tight tracking-tight; }
@@ -17,20 +16,20 @@
 @layer components {
   .btn { @apply inline-flex min-h-[50px] select-none items-center justify-center gap-2 rounded-2xl px-5 text-[15px] font-bold transition duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100; }
   .btn-primary { @apply btn bg-brand-600 text-white shadow-lift hover:bg-brand-700; }
-  .btn-secondary { @apply btn border border-paper-line bg-white text-ink shadow-card hover:border-brand-200 hover:bg-brand-50; }
+  .btn-secondary { @apply btn border border-paper-line bg-paper-card text-ink shadow-card hover:border-brand-200 hover:bg-brand-50; }
   .btn-ghost { @apply btn px-3 text-brand-700 hover:bg-brand-50; }
-  .btn-danger { @apply btn border border-danger-600/25 bg-white text-danger-600 hover:bg-danger-50; }
+  .btn-danger { @apply btn border border-danger-600/25 bg-paper-card text-danger-600 hover:bg-danger-50; }
   .btn-sm { @apply min-h-[42px] rounded-xl px-3.5 text-sm; }
   .card { @apply rounded-3xl bg-paper-card p-5 shadow-card ring-1 ring-paper-line/70; }
-  .input { @apply block min-h-[52px] w-full rounded-2xl border-0 bg-white px-4 text-base text-ink shadow-sm ring-1 ring-paper-line transition placeholder:text-ink-faint focus:ring-2 focus:ring-brand-500; }
+  .input { @apply block min-h-[52px] w-full rounded-2xl border-0 bg-paper-card px-4 text-base text-ink shadow-sm ring-1 ring-paper-line transition placeholder:text-ink-faint focus:ring-2 focus:ring-brand-500; }
   .label { @apply mb-2 block text-sm font-bold text-ink-soft; }
-  .chip { @apply inline-flex min-h-[42px] items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold text-ink-soft ring-1 ring-paper-line transition active:scale-[0.97]; }
+  .chip { @apply inline-flex min-h-[42px] items-center gap-1.5 rounded-full bg-paper-card px-4 text-sm font-semibold text-ink-soft ring-1 ring-paper-line transition active:scale-[0.97]; }
   .chip-on { @apply bg-brand-600 text-white ring-brand-600; }
   .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold; }
   .muted { @apply text-sm text-ink-mute; }
   .row { @apply flex items-center justify-between gap-3; }
   .section-title { @apply mb-3 mt-7 text-[13px] font-extrabold uppercase tracking-wider text-ink-mute; }
-  .hero { @apply relative overflow-hidden rounded-3xl p-5 text-white shadow-lift; background: radial-gradient(120% 140% at 100% 0%, #12997A 0%, #0B6E5A 38%, #0F2A44 100%); }
+  .hero { @apply relative overflow-hidden rounded-3xl p-5 text-white shadow-lift; background: var(--hero); }
   .hero-glass { @apply rounded-2xl bg-white/10 ring-1 ring-white/15 backdrop-blur-sm; }
   .rise > * { @apply animate-rise; }
   .rise > *:nth-child(2) { animation-delay: 40ms; }

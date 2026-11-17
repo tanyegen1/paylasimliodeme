@@ -51,7 +51,7 @@ export function ClaimBoard({ groupId, receiptId, meId, members, canManage, statu
           return (
             <li key={it.id}>
               <button type="button" disabled={!open} aria-pressed={mine} onClick={() => toggle(it)}
-                className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors ${mine ? "border-brand-600 bg-brand-50" : "border-paper-line bg-white"}`}>
+                className={`flex w-full items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors ${mine ? "border-brand-600 bg-brand-50" : "border-paper-line bg-paper-card"}`}>
                 <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 ${mine ? "border-brand-600 bg-brand-600 text-white" : "border-paper-line"}`}>{mine && <Check aria-hidden className="h-4 w-4" strokeWidth={3} />}</span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold">{it.quantity !== 1 ? `${String(it.quantity).replace(".", ",")} × ` : ""}{it.name}</span>

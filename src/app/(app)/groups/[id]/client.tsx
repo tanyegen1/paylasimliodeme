@@ -20,8 +20,8 @@ export function TransferActions({ groupId, groupName, transfer: x, fromName, toN
   groupId: string; groupName: string; transfer: Transfer; fromName: string; toName: string; role: "debtor" | "creditor" | "admin"; debtorHasAccount: boolean; dark?: boolean; compact?: boolean;
 }) {
   // Koyu (gradyan) kart üzerinde kullanıldığında düğme renkleri tersine döner.
-  const primary = dark ? "btn w-full bg-white text-brand-800 hover:bg-brand-50" : "btn-primary w-full";
-  const primarySm = dark ? "btn btn-sm bg-white text-brand-800 hover:bg-brand-50" : "btn-primary btn-sm";
+  const primary = dark ? "btn w-full bg-paper-card text-brand-800 hover:bg-brand-50" : "btn-primary w-full";
+  const primarySm = dark ? "btn btn-sm bg-paper-card text-brand-800 hover:bg-brand-50" : "btn-primary btn-sm";
   const secondarySm = dark ? "btn btn-sm bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25" : "btn-secondary btn-sm";
   const ghostSm = dark ? "btn btn-sm px-3 text-white/90 hover:bg-white/10" : "btn-ghost btn-sm";
   const router = useRouter();
@@ -49,7 +49,7 @@ export function TransferActions({ groupId, groupName, transfer: x, fromName, toN
         <button className={primarySm} disabled={pending} onClick={() => run(() => settleLinkAction(groupId, body), (d) => { setShare({ url: d.url, amount: d.amount }); router.refresh(); })}>{t("settle.requestShort")}</button>
         <Sheet open={!!share} onClose={() => setShare(null)} title={t("settle.shareTitle")}>
           <div className="grid gap-3">
-            <p className="whitespace-pre-line rounded-2xl bg-[#E7F7EC] px-4 py-3 text-[15px] text-ink">{text}</p>
+            <p className="whitespace-pre-line rounded-2xl bg-brand-50 px-4 py-3 text-[15px] text-ink">{text}</p>
             <ShareRow text={text} />
             <p className="muted text-xs">{t("settle.shareNote")}</p>
           </div>
@@ -67,11 +67,11 @@ export function TransferActions({ groupId, groupName, transfer: x, fromName, toN
       </div>
       {!debtorHasAccount && <p className={`text-xs ${dark ? "text-white/75" : "text-ink-mute"}`}>{t("settle.noAccountHint", { name: firstName(fromName) })}</p>}
       <ErrorText>{!recv && !share ? error : null}</ErrorText>
-      {info && <p role="status" className={`text-sm font-semibold ${dark ? "text-brand-100" : "text-brand-700"}`}>{info}</p>}
+      {info && <p role="status" className={`text-sm font-semibold ${dark ? "text-white/85" : "text-brand-700"}`}>{info}</p>}
 
       <Sheet open={!!share} onClose={() => setShare(null)} title={t("settle.shareTitle")}>
         <div className="grid gap-3">
-          <p className="whitespace-pre-line rounded-xl bg-white px-3 py-3 text-sm ring-1 ring-paper-line">{text}</p>
+          <p className="whitespace-pre-line rounded-xl bg-paper-card px-3 py-3 text-sm ring-1 ring-paper-line">{text}</p>
           <ShareRow text={text} />
           <p className="muted text-xs">{t("settle.shareNote")}</p>
         </div>
@@ -106,7 +106,7 @@ export function RequestShare({ groupId, requestId, groupName, toName, amount, mi
         <ErrorText>{error}</ErrorText>
       </span>
       <Sheet open={!!url} onClose={() => setUrl(null)} title={t("settle.shareTitle")}>
-        <div className="grid gap-3"><p className="whitespace-pre-line rounded-xl bg-white px-3 py-3 text-sm ring-1 ring-paper-line">{text}</p><ShareRow text={text} /></div>
+        <div className="grid gap-3"><p className="whitespace-pre-line rounded-xl bg-paper-card px-3 py-3 text-sm ring-1 ring-paper-line">{text}</p><ShareRow text={text} /></div>
       </Sheet>
     </>
   );
@@ -142,7 +142,7 @@ export function InvitePanel({ groupId, groupName, inviterName, target, compact, 
       )}
       <Sheet open={!!link} onClose={() => setLink(null)} title={target ? t("members.personalTitle", { name: target.name }) : t("members.inviteTitle")}>
         <div className="grid gap-3">
-          <p className="whitespace-pre-line rounded-xl bg-white px-3 py-3 text-sm ring-1 ring-paper-line">{text}</p>
+          <p className="whitespace-pre-line rounded-xl bg-paper-card px-3 py-3 text-sm ring-1 ring-paper-line">{text}</p>
           <ShareRow text={text} groupId={groupId} />
           <p className="muted text-xs">{target ? t("members.personalNote", { name: target.name }) : t("newGroup.linkNote")}</p>
         </div>
@@ -223,7 +223,7 @@ export function IncludeMember({ groupId, memberId, memberName, expenses }: { gro
           <p className="muted">{t("members.includeBody")}</p>
           <ul className="grid gap-1">
             {expenses.map((e) => (
-              <li key={e.id}><label className="flex min-h-[48px] items-center gap-3 rounded-xl bg-white px-3 text-sm ring-1 ring-paper-line">
+              <li key={e.id}><label className="flex min-h-[48px] items-center gap-3 rounded-xl bg-paper-card px-3 text-sm ring-1 ring-paper-line">
                 <input type="checkbox" checked={sel.includes(e.id)} onChange={(ev) => setSel(ev.target.checked ? [...sel, e.id] : sel.filter((x) => x !== e.id))} />
                 <span className="flex-1">{e.title}<span className="muted block text-xs">{e.date}</span></span><b>{e.amount}</b>
               </label></li>
