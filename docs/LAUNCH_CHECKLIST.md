@@ -6,7 +6,7 @@ Bu liste bitmeden uygulama gerçek kullanıcıya açılmamalıdır. Ücretli ser
 - [ ] Gizlilik politikası, kullanım koşulları ve KVKK aydınlatma metni bir hukuk danışmanınca yazılsın (`src/content/legal/` içindekiler taslaktır). Veri sorumlusu bilgileri, hukuki sebepler, saklama süreleri ve yurt dışı aktarımlar tamamlansın.
 - [ ] VERBİS kaydı ve açık rıza gereksinimleri değerlendirilsin.
 - [ ] Ödeme akışının (özellikle uygulama içi ödeme açılırsa) ödeme hizmetleri mevzuatı kapsamında lisans gerektirip gerektirmediği danışılsın. O zamana kadar "lisanslı", "tam uyumlu" gibi ifadeler kullanılmasın.
-- [ ] "Payımız" adı için marka ve alan adı araştırması yapılsın.
+- [ ] "Payda" adı ve logosu için marka tescili ve alan adı araştırması yapılsın.
 
 ## Kimlik ve hesap
 - [ ] E-posta sağlayıcısı bağlansın; e-posta doğrulama ve parola sıfırlama yazılsın. Şu an parolasını unutan kullanıcı hesabına giremez.

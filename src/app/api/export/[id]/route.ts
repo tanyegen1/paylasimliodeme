@@ -31,7 +31,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const lines = [head, ...rows, [], ["Ödemeler"], ["Tarih", "Kimden", "Kime", "Tutar", "Para birimi", "Durum"],
       ...pays.map((p) => [new Date(p.created_at).toISOString().slice(0, 10), name(p.from_member), name(p.to_member), minorToInput(p.amount_minor), p.currency, p.source === "provider" ? "Ödeme sağlayıcısı tarafından doğrulandı" : "Alıcı tarafından onaylandı"])];
     const csv = "﻿" + lines.map((l) => l.map(cell).join(";")).join("\r\n");
-    return new Response(csv, { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="payimiz-${month ?? "tum"}.csv"`, "cache-control": "private, no-store" } });
+    return new Response(csv, { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="payda-${month ?? "tum"}.csv"`, "cache-control": "private, no-store" } });
   } catch {
     return new Response("Bulunamadı", { status: 404 });
   }

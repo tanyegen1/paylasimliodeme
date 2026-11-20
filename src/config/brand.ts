@@ -1,8 +1,8 @@
-/** Marka metinleri tek yerden değişir. Ad geçicidir; marka/alan adı müsaitliği doğrulanmamıştır. */
+/** Marka metinleri tek yerden değişir. Logo: public/brand ve src/components/logo-paths.ts (rehber v2.0). Marka/alan adı tescili doğrulanmamıştır. */
 export const brand = {
-  name: "Payımız",
+  name: "Payda",
   tagline: "Hesabı paylaş. Kolayca ödeş.",
   description: "Ev, tatil ve yemek harcamalarını arkadaşlarınla paylaş, kimin kime ne kadar borcu olduğunu gör, kolayca ödeş.",
   supportEmail: "destek@example.com",
-  themeColor: "#0b8262",
+  themeColor: "#2459E8",
 } as const;

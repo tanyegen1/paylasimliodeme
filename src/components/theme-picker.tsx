@@ -49,7 +49,7 @@ export function ThemePicker({ onPicked }: { onPicked?: () => void }) {
           <button key={o.id} type="button" role="radio" aria-checked={on}
             onClick={() => { applyTheme(o.id); setCurrent(o.id); onPicked?.(); }}
             className={`relative rounded-2xl bg-paper-card p-2 text-left transition active:scale-[0.97] ${on ? "ring-2 ring-brand-500" : "ring-1 ring-paper-line hover:ring-brand-200"}`}>
-            {o.id === "auto" ? <Preview th={byId.emerald} half={byId.night} /> : <Preview th={byId[o.id]} />}
+            {o.id === "auto" ? <Preview th={byId.cobalt} half={byId.night} /> : <Preview th={byId[o.id]} />}
             <span className="mt-2 flex items-center justify-between gap-1 px-1 pb-0.5">
               <span className="min-w-0">
                 <span className="block truncate text-sm font-bold">{t(`theme.${o.id}`)}</span>

@@ -340,7 +340,7 @@ export const tr = {
   },
   theme: {
     title: "Görünüm", lead: "Uygulamanın rengini seç. Seçimin bu cihazda hatırlanır.", note: "Seçimin bu cihazda hatırlanır. Tutarlar ve durumlar her temada aynı anlamı taşır; renk tek başına anlam vermez.",
-    emerald: "Zümrüt", emerald_hint: "Açık · varsayılan", night: "Gece", night_hint: "Koyu",
+    cobalt: "Kobalt", cobalt_hint: "Payda · varsayılan", emerald: "Zümrüt", emerald_hint: "Açık yeşil", night: "Gece", night_hint: "Koyu",
     sky: "Gökyüzü", sky_hint: "Açık mavi", lavender: "Lavanta", lavender_hint: "Mor",
     coral: "Mercan", coral_hint: "Sıcak, açık", auto: "Otomatik", auto_hint: "Cihaza göre açık/koyu",
   },

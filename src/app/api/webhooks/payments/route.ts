@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const raw = await req.text();
   if (raw.length > 64_000) return NextResponse.json({ error: "too_large" }, { status: 413 });
   try {
-    const r = await handlePaymentWebhook(raw, req.headers.get("x-payimiz-signature"));
+    const r = await handlePaymentWebhook(raw, req.headers.get("x-payda-signature"));
     return NextResponse.json({ result: r.result }, { status: r.status });
   } catch (e) {
     log.error("webhook_failed", e);

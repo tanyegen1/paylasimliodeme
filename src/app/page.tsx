@@ -32,10 +32,11 @@ export default async function HomePage() {
       <Page>
         <header className="row mb-5">
           <div>
+            <Wordmark height={26} className="mb-4" />
             <p className="text-[15px] font-semibold text-ink-mute">{t("home.hello", { name: firstName(user.display_name) })} 👋</p>
             <h1 className="mt-0.5">{active.length ? t("home.headline") : t("home.headlineNew")}</h1>
           </div>
-          <Link href="/activity" aria-label={t("home.notifications")} className="relative grid h-12 w-12 place-items-center rounded-full bg-paper-card shadow-card ring-1 ring-paper-line transition active:scale-95">
+          <Link href="/activity" aria-label={t("home.notifications")} className="relative grid h-12 w-12 self-start place-items-center rounded-full bg-paper-card shadow-card ring-1 ring-paper-line transition active:scale-95">
             <Bell aria-hidden className="h-5 w-5" />
             {unread > 0 && <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-warm-600 ring-2 ring-paper-card" />}
           </Link>

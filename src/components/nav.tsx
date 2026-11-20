@@ -37,7 +37,7 @@ export function BottomNav({ unread, addHref }: { unread: number; addHref: string
           ) : (
             <li key={i} className="grid place-items-center">
               <Link href={add} aria-label={t("nav.add")}
-                className="-mt-7 grid h-[62px] w-[62px] place-items-center rounded-full bg-gradient-to-br from-brand-400 to-brand-700 text-white shadow-lift ring-[5px] ring-paper transition active:scale-95">
+                className="-mt-7 grid h-[62px] w-[62px] place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-lift ring-[5px] ring-paper transition active:scale-95">
                 <Plus aria-hidden className="h-7 w-7" strokeWidth={2.8} />
               </Link>
               <span className="mt-1 pb-2 text-[11px] font-bold text-brand-700">{t("nav.addShort")}</span>

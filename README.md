@@ -1,10 +1,14 @@
-# Payımız
+<p><img src="public/brand/payda-logo.svg" alt="Payda" height="56"></p>
+
+# Payda
 
 > **Hesabı paylaş. Kolayca ödeş.**
 
 Türkiye için ortak harcama ve hesaplaşma uygulaması. Bir kişi ev, tatil ya da yemek grubu kurar, WhatsApp'tan bağlantı gönderir; arkadaşları uygulama indirmeden katılır, payını görür ve ödeşir.
 
-"Payımız" geçici bir addır. Ad ve marka metinleri tek dosyadan değişir: `src/config/brand.ts`. Marka ya da alan adı müsaitliği doğrulanmamıştır.
+Ad ve marka metinleri tek dosyadan değişir: `src/config/brand.ts`. Logo dosyaları `public/brand/` içinde; uygulamadaki logo, "Payda / Logo kullanım rehberi v2.0" PDF'indeki vektörlerden birebir çıkarıldı (`src/components/logo-paths.ts`). Marka tescili ve alan adı doğrulanmamıştır.
+
+Teknik adlar (veritabanı `payimiz_*`, Render hizmeti `payimiz`) eski proje adıyla kalır; kullanıcıya görünmezler.
 
 
 ## Kendi internet adresiyle yayınla (Render)

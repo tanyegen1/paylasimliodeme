@@ -337,7 +337,7 @@ export async function sandboxDecideAction(ref: string, outcome: "succeeded" | "f
     let delivered = false;
     try {
       const res = await fetch(`${env.appUrl}/api/webhooks/payments`, {
-        method: "POST", body, headers: { "content-type": "application/json", "x-payimiz-signature": signWebhook(body, env.paymentWebhookSecret) }, signal: AbortSignal.timeout(5000),
+        method: "POST", body, headers: { "content-type": "application/json", "x-payda-signature": signWebhook(body, env.paymentWebhookSecret) }, signal: AbortSignal.timeout(5000),
       });
       delivered = res.ok;
     } catch { /* webhook ulaşmadıysa ödeme sayfası sunucudan durum sorgular */ }

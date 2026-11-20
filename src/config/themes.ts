@@ -34,16 +34,23 @@ const lightBase = {
 
 export const THEMES: Theme[] = [
   {
+    // Payda logo rehberi v2.0: Kobalt #2459E8, açık zemin #F2F5FA
+    ...lightBase, id: "cobalt", chrome: "#2459E8",
+    paper: { DEFAULT: "#F2F5FA", card: "#FFFFFF", line: "#E1E7F0", sunk: "#E9EEF6" },
+    brand: { 50: "#EEF3FE", 100: "#DCE6FD", 200: "#B9CDFB", 300: "#8DADF6", 400: "#5A86F0", 500: "#3A6BEC", 600: "#2459E8", 700: "#1C47BD", 800: "#193B96", 900: "#183476" },
+    hero: ["#4B7BF0", "#2459E8", "#101828"],
+  },
+  {
     ...lightBase, id: "emerald", chrome: "#0B8466",
     paper: { DEFAULT: "#F3F6F4", card: "#FFFFFF", line: "#E3E9E5", sunk: "#EBF0ED" },
     brand: { 50: "#E7F7F1", 100: "#C8EEDF", 200: "#9FDFC8", 300: "#6CCBAC", 400: "#36B38F", 500: "#12997A", 600: "#0B8466", 700: "#086B53", 800: "#075442", 900: "#063F33" },
     hero: ["#12997A", "#0B6E5A", "#0F2A44"],
   },
   {
-    ...lightBase, id: "sky", chrome: "#1663C2",
-    paper: { DEFAULT: "#F2F6FB", card: "#FFFFFF", line: "#DFE7F1", sunk: "#E8EFF8" },
-    brand: { 50: "#EAF4FF", 100: "#D3E7FF", 200: "#A9D0FF", 300: "#75B3FA", 400: "#4294EF", 500: "#1F78DB", 600: "#1663C2", 700: "#124F9C", 800: "#10427E", 900: "#0E3765" },
-    hero: ["#3B95F2", "#1663C2", "#0F2A4A"],
+    ...lightBase, id: "sky", chrome: "#0B78AD",
+    paper: { DEFAULT: "#F1F8FB", card: "#FFFFFF", line: "#DCEAF1", sunk: "#E6F2F8" },
+    brand: { 50: "#EAF7FD", 100: "#CFEDFA", 200: "#A3DCF5", 300: "#6CC6EE", 400: "#33ABE2", 500: "#1492CC", 600: "#0B78AD", 700: "#0A628D", 800: "#0B4F71", 900: "#0B415C" },
+    hero: ["#1E9AD6", "#0B78AD", "#0D2A3D"],
   },
   {
     ...lightBase, id: "lavender", chrome: "#6842CF",
@@ -60,30 +67,31 @@ export const THEMES: Theme[] = [
     hero: ["#E05A37", "#C2442A", "#3B1E2A"],
   },
   {
-    id: "night", dark: true, chrome: "#0B141D",
-    ink: { DEFAULT: "#E8EEF5", soft: "#BAC6D4", mute: "#94A2B4", faint: "#6F7E92" },
-    paper: { DEFAULT: "#0B141D", card: "#15212D", line: "#253444", sunk: "#1B2937" },
+    id: "night", dark: true, chrome: "#101828",
+    ink: { DEFAULT: "#E8EEF5", soft: "#BAC6D4", mute: "#97A3B6", faint: "#717E93" },
+    paper: { DEFAULT: "#101828", card: "#182234", line: "#27334A", sunk: "#1E2A3F" },
     // Koyu temada 50–200 zemin tonları koyu, 700–900 metin tonları açıktır.
-    brand: { 50: "#0F2E28", 100: "#143F36", 200: "#1C5647", 300: "#2E8A6F", 400: "#3CC49F", 500: "#19A783", 600: "#0B8466", 700: "#6FDDB9", 800: "#A2EDD3", 900: "#C9F6E6" },
+    brand: { 50: "#16244A", 100: "#1B2D5C", 200: "#243D7B", 300: "#3459C4", 400: "#6A90F5", 500: "#4F7CF2", 600: "#2459E8", 700: "#9DB8FF", 800: "#C2D3FF", 900: "#DCE6FF" },
     warm: { 50: "#3A2611", 100: "#4D3214", 200: "#F5C27A", 600: "#F0A955", 700: "#F6BE78" },
     danger: { 50: "#3B1517", 600: "#FF8A80" },
     sky: { 50: "#10263D", 100: "#17324F", 700: "#8CC4FF", 800: "#A9D3FF", 900: "#C7E2FF" },
     violet: { 50: "#261B44", 700: "#C3AEFF" },
-    hero: ["#13A07F", "#0B5A4A", "#0A1824"],
+    hero: ["#3A6BEC", "#1C3F9E", "#0B1120"],
   },
 ];
 
 /** Seçicide gösterilen seçenekler. "auto" cihazın açık/koyu ayarını izler. */
 export const THEME_OPTIONS = [
+  { id: "cobalt", swatch: ["#2459E8", "#F2F5FA"] },
+  { id: "night", swatch: ["#2459E8", "#101828"] },
   { id: "emerald", swatch: ["#0B8466", "#F3F6F4"] },
-  { id: "night", swatch: ["#13A07F", "#0B141D"] },
-  { id: "sky", swatch: ["#1663C2", "#F2F6FB"] },
+  { id: "sky", swatch: ["#0B78AD", "#F1F8FB"] },
   { id: "lavender", swatch: ["#6842CF", "#F6F4FB"] },
   { id: "coral", swatch: ["#C2442A", "#FBF5F2"] },
-  { id: "auto", swatch: ["#0B8466", "#0B141D"] },
+  { id: "auto", swatch: ["#2459E8", "#101828"] },
 ] as const;
 export type ThemeId = (typeof THEME_OPTIONS)[number]["id"];
-export const DEFAULT_THEME: ThemeId = "emerald";
+export const DEFAULT_THEME: ThemeId = "cobalt";
 export const THEME_COOKIE = "pz_theme";
 export const isThemeId = (v: unknown): v is ThemeId => typeof v === "string" && THEME_OPTIONS.some((o) => o.id === v);
 
@@ -98,6 +106,7 @@ function vars(th: Theme): string {
   };
   add("ink", th.ink); add("paper", th.paper); add("brand", th.brand); add("warm", th.warm);
   add("danger", th.danger); add("sky", th.sky); add("violet", th.violet);
+  out.push(th.dark ? "--logo-mark:255 255 255" : "--logo-mark:36 89 232", th.dark ? "--logo-text:255 255 255" : "--logo-text:0 0 0");
   out.push(`--hero:radial-gradient(120% 140% at 100% 0%, ${th.hero[0]} 0%, ${th.hero[1]} 38%, ${th.hero[2]} 100%)`);
   return out.join(";");
 }
@@ -106,9 +115,9 @@ function vars(th: Theme): string {
 export function themeCss(): string {
   const byId = Object.fromEntries(THEMES.map((th) => [th.id, th]));
   const css = THEMES.map((th) => `:root[data-theme="${th.id}"]{${vars(th)}}`);
-  css.unshift(`:root{${vars(byId.emerald)}}`);
-  css.push(`:root[data-theme="auto"]{${vars(byId.emerald)}}`);
+  css.unshift(`:root{${vars(byId.cobalt)}}`);
+  css.push(`:root[data-theme="auto"]{${vars(byId.cobalt)}}`);
   css.push(`@media (prefers-color-scheme: dark){:root[data-theme="auto"]{${vars(byId.night)}}}`);
   return css.join("\n");
 }
-export const themeChrome = (id: ThemeId) => (id === "auto" ? "#0B8466" : THEMES.find((th) => th.id === id)!.chrome);
+export const themeChrome = (id: ThemeId) => (id === "auto" ? "#2459E8" : THEMES.find((th) => th.id === id)!.chrome);

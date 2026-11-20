@@ -1,4 +1,5 @@
 # Render.com "Deploy to Render" planı: tek tıkla web sunucusu + PostgreSQL.
+# Not: hizmet ve veritabanı adları ("payimiz") eski adla kalır; değiştirmek Render'da yeni kaynak açar.
 # Yalnızca DEMO içindir: örnek kişiler, sandbox ödeme (gerçek para yok), örnek fiş okuma.
 services:
   - type: web

@@ -11,6 +11,6 @@ fi
 
 if [ ! -d .next ]; then npm run build; fi
 pkill -f "next start" 2>/dev/null || true
-nohup npx next start -p 3000 > /tmp/payimiz.log 2>&1 &
+nohup npx next start -p 3000 > /tmp/payda.log 2>&1 &
 disown || true
-echo "Payımız başladı: ${APP_URL}  (kayıt: /tmp/payimiz.log)"
+echo "Payda başladı: ${APP_URL}  (kayıt: /tmp/payda.log)"

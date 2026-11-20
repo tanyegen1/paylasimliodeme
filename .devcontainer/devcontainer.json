@@ -1,11 +1,11 @@
 {
-  "name": "Payımız (demo)",
+  "name": "Payda (demo)",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "forwardPorts": [3000],
   "portsAttributes": {
-    "3000": { "label": "Payımız", "onAutoForward": "openBrowser" }
+    "3000": { "label": "Payda", "onAutoForward": "openBrowser" }
   },
   "postCreateCommand": "bash .devcontainer/setup.sh",
   "postStartCommand": "bash .devcontainer/start.sh",

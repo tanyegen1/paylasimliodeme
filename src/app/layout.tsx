@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: brand.description,
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: brand.name, statusBarStyle: "default" },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: [{ url: "/icon.svg", type: "image/svg+xml" }, { url: "/icon-192.png", sizes: "192x192", type: "image/png" }], apple: "/apple-touch-icon.png" },
 };
 
 async function currentTheme() {
