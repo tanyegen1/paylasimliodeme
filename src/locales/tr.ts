@@ -241,7 +241,8 @@ export const tr = {
   },
   receipt: {
     newTitle: "Fiş paylaş", newLead: "Kalemleri gir, herkes kendi yediğini seçsin.", editTitle: "Fiş taslağı",
-    photo: "Fiş fotoğrafı çek ya da seç", photoChange: "Fotoğrafı değiştir", uploading: "Yükleniyor…", reading: "Fiş okunuyor…",
+    photo: "Fiş fotoğrafı ekle", photoChange: "Fotoğrafı değiştir", takePhoto: "Fotoğraf çek", fromGallery: "Galeriden seç",
+    photoUnreadable: "Bu fotoğraf açılamadı. Başka bir fotoğraf seç ya da fişi yeniden çek.", uploading: "Yükleniyor…", reading: "Fiş okunuyor…",
     ocrNone: "Otomatik fiş okuma bu kurulumda etkin değil. Fotoğrafı belge olarak ekleyip kalemleri elle girebilirsin.",
     ocrDemo: "DEMO: Fotoğrafın okunmuyor; ne yüklersen yükle aynı örnek fiş doldurulur.",
     ocrDone: "Fiş okundu. Kaydetmeden önce kalemleri kontrol et.", ocrUncertain: "{n} kalem belirsiz okundu.",

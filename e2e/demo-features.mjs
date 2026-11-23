@@ -74,11 +74,41 @@ try {
   await ece.goto(`${yemek}/receipts/new`);
   await see(ece, "DEMO: Fotoğrafın okunmuyor");
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
-  await ece.locator('input[type="file"]').setInputFiles({ name: "fis.png", mimeType: "image/png", buffer: png });
+  await ece.locator('input[type="file"]:not([capture])').setInputFiles({ name: "fis.png", mimeType: "image/png", buffer: png });
   await see(ece, "Fiş okundu");
   await see(ece, "Belirsiz okundu, kontrol et");
   await ece.screenshot({ path: `${OUT}26-ocr-taslak.png`, fullPage: true });
   ok("Demo OCR: düzenlenebilir taslak, belirsiz kalem işaretli");
+
+  // iPhone düzeltmesi: kamera ve galeri ayrı; galeri girişinde capture yok (Fotoğraf Arşivi açılabilir)
+  const inputs = await ece.locator('input[type="file"]').evaluateAll((els) => els.map((e) => ({ capture: e.getAttribute("capture"), accept: e.getAttribute("accept") })));
+  if (inputs.length !== 2 || inputs.filter((i) => i.capture).length !== 1) throw new Error("Kamera/galeri girişleri hatalı: " + JSON.stringify(inputs));
+  // Büyük (48 MP benzeri) fotoğraf: tarayıcıda küçültülüp JPEG olarak yüklenmeli (8 MB sınırına takılmamalı)
+  const big = await ece.evaluate(async () => {
+    // Gerçek fotoğraf gibi sıkıştırılması zor (gürültülü) 3600×2400 görsel → PNG olarak 8 MB'ı aşar
+    const c = document.createElement("canvas"); c.width = 3600; c.height = 2400;
+    const x = c.getContext("2d"); const d = x.createImageData(c.width, c.height);
+    let seed = 7; for (let i = 0; i < d.data.length; i++) { seed = (seed * 1103515245 + 12345) & 0x7fffffff; d.data[i] = (i & 3) === 3 ? 255 : seed & 255; }
+    x.putImageData(d, 0, 0);
+    const b = await new Promise((r) => c.toBlob(r, "image/png")); const buf = new Uint8Array(await b.arrayBuffer());
+    let s = ""; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode(...buf.subarray(i, i + 0x8000)); return btoa(s);
+  });
+  const bigBuf = Buffer.from(big, "base64");
+  if (bigBuf.length <= 8 * 1024 * 1024) throw new Error("Test fotoğrafı 8 MB'tan büyük olmalı, " + bigBuf.length);
+  const uploaded = ece.waitForResponse((r) => r.url().endsWith("/api/upload"));
+  await ece.locator('input[type="file"]:not([capture])').setInputFiles({ name: "IMG_0001.png", mimeType: "image/png", buffer: bigBuf });
+  const up = await uploaded;
+  const upJson = await up.json();
+  if (up.status() !== 200 || upJson.mime !== "image/jpeg") throw new Error("Büyük fotoğraf yüklenemedi: " + up.status() + " " + JSON.stringify(upJson));
+  let stored = "?";
+  if (process.env.DATABASE_URL) {
+    const { Client } = createRequire(import.meta.url)("pg");
+    const db = new Client({ connectionString: process.env.DATABASE_URL }); await db.connect();
+    const row = (await db.query("select size_bytes, mime from attachments where id=$1", [upJson.id])).rows[0]; await db.end();
+    if (!row || row.mime !== "image/jpeg" || row.size_bytes > 3 * 1024 * 1024) throw new Error("Saklanan dosya beklenenden büyük: " + JSON.stringify(row));
+    stored = (row.size_bytes / 1048576).toFixed(1);
+  }
+  ok(`Galeriden ${(bigBuf.length / 1048576).toFixed(1)} MB fotoğraf seçildi; tarayıcıda küçültülüp ${stored} MB JPEG olarak yüklendi`);
 
   // Metinden taslak
   const tan = await login("Tan");

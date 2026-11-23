@@ -2,12 +2,13 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, Camera, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Camera, ImageIcon, Plus, Trash2 } from "lucide-react";
 import { openReceiptAction, saveReceiptAction, scanReceiptAction, deleteReceiptAction } from "@/app/actions";
 import { ActButton, ErrorText, Field, useAct } from "@/components/client";
 import { Notice, Badge } from "@/components/ui";
 import { CURRENCY_CODES, formatMoney, minorToInput, parseMoney } from "@/lib/money";
 import { t } from "@/lib/i18n";
+import { ImagePrepError, prepareImage } from "@/lib/prepare-image";
 
 type Row = { id?: string; name: string; quantity: string; amount: string; uncertain: boolean };
 export type ReceiptInitial = { id: string; title: string; payerMemberId: string; currency: string; expenseDate: string; items: Row[]; declaredTotal: string; discount: string; service: string; tip: string; extrasMode: "proportional" | "equal" };
@@ -18,7 +19,8 @@ export function ReceiptEditor({ groupId, members, meId, groupCurrency, today, oc
 }) {
   const router = useRouter();
   const { pending, error, run, setError } = useAct();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const [f, setF] = useState<Omit<ReceiptInitial, "id" | "items">>(initial ?? { title: "", payerMemberId: meId, currency: groupCurrency, expenseDate: today, declaredTotal: "", discount: "", service: "", tip: "", extrasMode: "proportional" });
   const [items, setItems] = useState<Row[]>(initial?.items ?? [{ name: "", quantity: "1", amount: "", uncertain: false }]);
   const [attachmentId, setAttachmentId] = useState<string | null>(null);
@@ -37,8 +39,14 @@ export function ReceiptEditor({ groupId, members, meId, groupCurrency, today, oc
     if (!file) return;
     setError(null); setUploading(true);
     try {
+      let upload: File;
+      try {
+        upload = await prepareImage(file);
+      } catch (e) {
+        return setError(e instanceof ImagePrepError ? t("receipt.photoUnreadable") : t("errors.generic"));
+      }
       const fd = new FormData();
-      fd.set("file", file); fd.set("groupId", groupId); fd.set("kind", "receipt");
+      fd.set("file", upload); fd.set("groupId", groupId); fd.set("kind", "receipt");
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       const j = await res.json();
       if (!res.ok) return setError(j.error ?? t("errors.generic"));
@@ -50,7 +58,12 @@ export function ReceiptEditor({ groupId, members, meId, groupCurrency, today, oc
           setF((p) => ({ ...p, title: p.title || d.merchant || "", discount: d.discountMinor ? minorToInput(d.discountMinor) : "", service: d.serviceMinor ? minorToInput(d.serviceMinor) : "", declaredTotal: d.totalMinor != null ? minorToInput(d.totalMinor) : "" }));
         });
       }
-    } catch { setError(t("errors.network")); } finally { setUploading(false); }
+    } catch { setError(t("errors.network")); } finally {
+      setUploading(false);
+      // Aynı fotoğraf yeniden seçilirse de değişiklik olayı tetiklensin
+      if (cameraRef.current) cameraRef.current.value = "";
+      if (galleryRef.current) galleryRef.current.value = "";
+    }
   };
 
   const payload = () => ({
@@ -68,8 +81,14 @@ export function ReceiptEditor({ groupId, members, meId, groupCurrency, today, oc
   return (
     <div className="grid gap-5">
       <div className="card grid gap-3">
-        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" aria-label={t("receipt.photo")} onChange={(e) => onFile(e.target.files?.[0])} />
-        <button type="button" className="btn-secondary" disabled={uploading || pending} onClick={() => fileRef.current?.click()}><Camera aria-hidden className="h-5 w-5" />{uploading ? t("receipt.uploading") : pending && attachmentId ? t("receipt.reading") : attachmentId ? t("receipt.photoChange") : t("receipt.photo")}</button>
+        {/* iPhone'da capture'lı giriş doğrudan kamerayı açar, capture'sız giriş Fotoğraf Arşivi'ni de sunar. */}
+        <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => onFile(e.target.files?.[0])} />
+        <input ref={galleryRef} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => onFile(e.target.files?.[0])} />
+        <p className="text-sm font-bold text-ink-soft">{uploading ? t("receipt.uploading") : pending && attachmentId ? t("receipt.reading") : attachmentId ? t("receipt.photoChange") : t("receipt.photo")}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" className="btn-secondary" disabled={uploading || pending} onClick={() => cameraRef.current?.click()}><Camera aria-hidden className="h-5 w-5" />{t("receipt.takePhoto")}</button>
+          <button type="button" className="btn-secondary" disabled={uploading || pending} onClick={() => galleryRef.current?.click()}><ImageIcon aria-hidden className="h-5 w-5" />{t("receipt.fromGallery")}</button>
+        </div>
         {ocr === "none" && <p className="muted text-xs">{t("receipt.ocrNone")}</p>}
         {ocr === "demo" && <Notice tone="warn">{t("receipt.ocrDemo")}</Notice>}
         {ocrProvider && <Notice tone="ok">{t("receipt.ocrDone")}{uncertain > 0 ? ` ${t("receipt.ocrUncertain", { n: uncertain })}` : ""}</Notice>}
