@@ -53,7 +53,7 @@ export const tr = {
   groups: { title: "Gruplar", new: "Yeni", members: "{n} kişi", archived: "Arşivde" },
   newGroup: {
     title: "Yeni grup", type: "Ne için?", name: "Grup adı",
-    namePh_home: "Örn. Kadıköy Ev", namePh_trip: "Örn. Bodrum Hafta Sonu", namePh_meal: "Örn. Cuma Yemeği", namePh_event: "Örn. Ece'nin Doğum Günü", namePh_other: "Grubun adı",
+    namePh_home: "Örn. Kadıköy Ev", namePh_trip: "Örn. Bodrum Hafta Sonu", namePh_meal: "Örn. Cuma Yemeği", namePh_event: "Örn. Zeynep'in Doğum Günü", namePh_other: "Grubun adı",
     people: "Kimler var? (isteğe bağlı)", personPh: "İsim yaz", removePerson: "{name} adını çıkar",
     peopleHint: "İsimleri şimdi ekleyip harcamaları hemen bölüştürebilirsin. Arkadaşların bağlantıyla katılınca kendi isimlerini sahiplenir.",
     start: "Başlangıç", end: "Bitiş", more: "Para birimi ve hatırlatmalar", currency: "Para birimi",
@@ -267,7 +267,7 @@ export const tr = {
   },
   quick: {
     title: "Yazarak ya da konuşarak ekle", lead: "Harcamayı kendi cümlenle anlat; taslağı birlikte kontrol edelim.",
-    placeholder: "Örn. Markete 1.240 lira verdim. Dördümüze böl ama temizlik malzemelerinin 200 lirasını Ece'ye yazma.",
+    placeholder: "Örn. Markete 1.240 lira verdim. Dördümüze böl ama temizlik malzemelerinin 200 lirasını Zeynep'e yazma.",
     analyze: "Taslağı hazırla", speak: "Konuş", stop: "Bitir", listening: "Dinliyorum…",
     voiceUnsupported: "Bu tarayıcı konuşma tanımayı desteklemiyor. Yazarak devam edebilirsin.", voiceError: "Ses alınamadı. Mikrofon iznini kontrol et ya da yazarak devam et.",
     consentTitle: "Mikrofon izni", consentBody: "Konuşman, tarayıcının kendi konuşma tanıma özelliğiyle yazıya çevrilir. Ses kaydı sunucularımıza gönderilmez ve saklanmaz; yalnızca ortaya çıkan metin taslak hazırlamak için işlenir. Tarayıcın sesi kendi hizmet sağlayıcısına iletebilir. Metni göndermeden önce düzeltebilirsin.",

@@ -28,7 +28,7 @@ try {
   ok("Kurucu yalnızca adıyla başladı");
 
   await tan.getByLabel("Grup adı").fill("Kadıköy Ev");
-  await tan.getByPlaceholder("İsim yaz").fill("Ece");
+  await tan.getByPlaceholder("İsim yaz").fill("Zeynep");
   await tan.getByRole("button", { name: "Ekle", exact: true }).click();
   await shot(tan, "02-yeni-grup");
   await tan.getByRole("button", { name: "Grubu kur" }).click();
@@ -47,21 +47,21 @@ try {
   await expectText(tan, "Kaydedildi.");
 
   // Davetli: uygulama indirmeden, tarayıcıdan
-  const ece = await mk();
-  await ece.goto(inviteUrl.replace(/^https?:\/\/[^/]+/, BASE));
-  await expectText(ece, "Tan seni davet ediyor");
-  const preview = await ece.locator("main").innerText();
+  const zeynep = await mk();
+  await zeynep.goto(inviteUrl.replace(/^https?:\/\/[^/]+/, BASE));
+  await expectText(zeynep, "Tan seni davet ediyor");
+  const preview = await zeynep.locator("main").innerText();
   if (/TR33|IBAN|₺\s?\d/.test(preview)) throw new Error("Önizleme finansal veri sızdırıyor");
-  await shot(ece, "04-davet-onizleme");
-  await ece.getByLabel("Adın").fill("Ece");
-  await ece.getByRole("checkbox").first().check();
-  await ece.getByLabel("Evet, ben Ece").check();
-  await ece.getByRole("button", { name: "Onaya gönder" }).click();
-  await expectText(ece, "Yönetici onayı bekleniyor");
-  await shot(ece, "05-onay-bekliyor");
+  await shot(zeynep, "04-davet-onizleme");
+  await zeynep.getByLabel("Adın").fill("Zeynep");
+  await zeynep.getByRole("checkbox").first().check();
+  await zeynep.getByLabel("Evet, ben Zeynep").check();
+  await zeynep.getByRole("button", { name: "Onaya gönder" }).click();
+  await expectText(zeynep, "Yönetici onayı bekleniyor");
+  await shot(zeynep, "05-onay-bekliyor");
   ok("Davetli güvenli önizlemeyi gördü; isim sahiplenme yönetici onayına gitti");
 
-  // Kurucu harcama ekler (Ece henüz onaylanmadan, geçici isme)
+  // Kurucu harcama ekler (Zeynep henüz onaylanmadan, geçici isme)
   await tan.goto(BASE);
   await expectText(tan, "gruba katılmak için onayını bekliyor"); // ana sayfada "Senden bekleyenler"
   await tan.goto(`${BASE}/groups`);
@@ -87,33 +87,33 @@ try {
   await tan.getByText("olarak gruba katılmak istiyor").waitFor({ state: "detached" });
   ok("Yönetici sahiplenmeyi onayladı");
 
-  await ece.getByRole("button", { name: "Tekrar kontrol et" }).click();
-  await ece.getByRole("link", { name: "Grubu aç" }).click();
-  await expectText(ece, "Borcun");
-  await expectText(ece, "₺620,25");
-  await shot(ece, "09-davetli-ozet");
+  await zeynep.getByRole("button", { name: "Tekrar kontrol et" }).click();
+  await zeynep.getByRole("link", { name: "Grubu aç" }).click();
+  await expectText(zeynep, "Borcun");
+  await expectText(zeynep, "₺620,25");
+  await shot(zeynep, "09-davetli-ozet");
   ok("Davetli kendi bakiyesini görüyor: Borcun ₺620,25");
 
   // Bakiye açıklaması
-  await ece.goto(`${ece.url().split("?")[0]}?tab=balances`);
-  await shot(ece, "10-kim-kime");
-  await ece.getByRole("link", { name: /Ece/ }).first().click();
-  await expectText(ece, "Market alışverişi");
-  await shot(ece, "11-bakiye-dokumu");
+  await zeynep.goto(`${zeynep.url().split("?")[0]}?tab=balances`);
+  await shot(zeynep, "10-kim-kime");
+  await zeynep.getByRole("link", { name: /Zeynep/ }).first().click();
+  await expectText(zeynep, "Market alışverişi");
+  await shot(zeynep, "11-bakiye-dokumu");
   ok("Borcun hangi harcamadan geldiği görülebiliyor");
 
   // Ödeş
-  await ece.goBack();
-  await ece.getByRole("button", { name: /Ödeş · ₺620,25/ }).first().click();
-  await ece.waitForURL("**/pay/**");
-  await expectText(ece, "₺620,25");
-  if ((await ece.locator("main").innerText()).includes("TR33")) throw new Error("IBAN açık istek olmadan gösterildi");
-  await ece.getByRole("button", { name: /IBAN bilgisini göster/ }).click();
-  await expectText(ece, "TR33 0006 1005 1978 6457 8413 26");
-  await shot(ece, "12-odeme-sayfasi");
-  await ece.getByRole("button", { name: "Ödeme yaptım" }).click();
-  await expectText(ece, "Bildirimin iletildi");
-  await shot(ece, "13-bildirildi");
+  await zeynep.goBack();
+  await zeynep.getByRole("button", { name: /Ödeş · ₺620,25/ }).first().click();
+  await zeynep.waitForURL("**/pay/**");
+  await expectText(zeynep, "₺620,25");
+  if ((await zeynep.locator("main").innerText()).includes("TR33")) throw new Error("IBAN açık istek olmadan gösterildi");
+  await zeynep.getByRole("button", { name: /IBAN bilgisini göster/ }).click();
+  await expectText(zeynep, "TR33 0006 1005 1978 6457 8413 26");
+  await shot(zeynep, "12-odeme-sayfasi");
+  await zeynep.getByRole("button", { name: "Ödeme yaptım" }).click();
+  await expectText(zeynep, "Bildirimin iletildi");
+  await shot(zeynep, "13-bildirildi");
   ok("Borçlu IBAN'ı gördü ve “Ödeme yaptım” bildirdi (otomatik doğrulama iddiası yok)");
 
   // Beyan bakiyeyi değiştirmemeli
@@ -130,10 +130,10 @@ try {
   await shot(tan, "16-odesik");
   ok("Alıcı onayladı; bakiye ancak onaydan sonra kapandı");
 
-  await ece.goto(BASE);
-  await shot(ece, "17-davetli-ana-sayfa");
-  await ece.goto(`${BASE}/activity`);
-  await expectText(ece, "ödemen onaylandı");
+  await zeynep.goto(BASE);
+  await shot(zeynep, "17-davetli-ana-sayfa");
+  await zeynep.goto(`${BASE}/activity`);
+  await expectText(zeynep, "ödemen onaylandı");
   ok("Borçluya onay bildirimi ulaştı");
 
   // Yetkisiz erişim: üçüncü kişi grup adresini bilse de göremez
@@ -143,7 +143,7 @@ try {
   ok("Oturumsuz ziyaretçi grup sayfasına ulaşamıyor");
 
   // Yatay taşma ve dokunma hedefi denetimi
-  for (const [p, name] of [[tan, "kurucu"], [ece, "davetli"]]) {
+  for (const [p, name] of [[tan, "kurucu"], [zeynep, "davetli"]]) {
     for (const path of ["/", "/groups", "/profile"]) {
       await p.goto(BASE + path);
       const overflow = await p.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);

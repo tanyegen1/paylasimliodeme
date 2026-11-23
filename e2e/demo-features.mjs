@@ -17,40 +17,40 @@ const see = (p, text) => p.getByText(text, { exact: false }).first().waitFor();
 const openGroup = async (p, name) => { await p.goto(`${BASE}/groups`); await p.getByRole("link", { name: new RegExp(name) }).first().click(); await p.waitForURL(/\/groups\/[0-9a-f-]{36}/); return p.url().split("?")[0]; };
 
 try {
-  const ece = await login("Ece");
-  await see(ece, "DEMO ortamı");
-  await ece.screenshot({ path: `${OUT}20-demo-ana-sayfa.png` });
+  const zeynep = await login("Zeynep");
+  await see(zeynep, "DEMO ortamı");
+  await zeynep.screenshot({ path: `${OUT}20-demo-ana-sayfa.png` });
   ok("Demo girişi ve DEMO şeridi");
 
-  // Sandbox ödeme: Ece → Tan ₺1.000 talebi
-  const bodrum = await openGroup(ece, "Bodrum Hafta Sonu");
-  await ece.goto(`${bodrum}?tab=payments`);
-  await see(ece, "DEMO ödeme simülatörü açık");
-  await ece.getByRole("button", { name: "Ödeş", exact: true }).first().click();
-  await ece.waitForURL("**/pay/**");
-  const payUrl = ece.url();
-  await see(ece, "İşlem ücreti");
-  await ece.screenshot({ path: `${OUT}21-odeme-saglayici.png`, fullPage: true });
-  await ece.getByRole("button", { name: "Onay sayfasına git" }).click();
-  await ece.waitForURL("**/sandbox-pay/**");
-  await see(ece, "DEMO · gerçek ödeme değil");
-  await ece.screenshot({ path: `${OUT}22-sandbox.png` });
+  // Sandbox ödeme: Zeynep → Tan ₺1.000 talebi
+  const bodrum = await openGroup(zeynep, "Bodrum Hafta Sonu");
+  await zeynep.goto(`${bodrum}?tab=payments`);
+  await see(zeynep, "DEMO ödeme simülatörü açık");
+  await zeynep.getByRole("button", { name: "Ödeş", exact: true }).first().click();
+  await zeynep.waitForURL("**/pay/**");
+  const payUrl = zeynep.url();
+  await see(zeynep, "İşlem ücreti");
+  await zeynep.screenshot({ path: `${OUT}21-odeme-saglayici.png`, fullPage: true });
+  await zeynep.getByRole("button", { name: "Onay sayfasına git" }).click();
+  await zeynep.waitForURL("**/sandbox-pay/**");
+  await see(zeynep, "DEMO · gerçek ödeme değil");
+  await zeynep.screenshot({ path: `${OUT}22-sandbox.png` });
   // Dönüş adresine güvenilmediğini göster: onaylamadan ödeme sayfasına dön → hâlâ "işleniyor"
-  const sandboxUrl = ece.url();
-  await ece.goto(payUrl);
-  await see(ece, "Ödemen işleniyor");
+  const sandboxUrl = zeynep.url();
+  await zeynep.goto(payUrl);
+  await see(zeynep, "Ödemen işleniyor");
   ok("Onay gelmeden ödeme sayfası borcu kapatmıyor; ikinci ödeme başlatılamıyor");
-  await ece.goto(sandboxUrl);
-  await ece.getByRole("button", { name: "Ödemeyi onayla (demo)" }).click();
-  await see(ece, "Sonuç uygulamaya iletildi");
-  await ece.goto(payUrl);
-  await see(ece, "Bu borç kapandı");
-  await ece.goto(`${bodrum}?tab=payments`);
-  await see(ece, "Ödeme sağlayıcısı tarafından doğrulandı");
-  await ece.screenshot({ path: `${OUT}23-dogrulandi.png`, fullPage: true });
+  await zeynep.goto(sandboxUrl);
+  await zeynep.getByRole("button", { name: "Ödemeyi onayla (demo)" }).click();
+  await see(zeynep, "Sonuç uygulamaya iletildi");
+  await zeynep.goto(payUrl);
+  await see(zeynep, "Bu borç kapandı");
+  await zeynep.goto(`${bodrum}?tab=payments`);
+  await see(zeynep, "Ödeme sağlayıcısı tarafından doğrulandı");
+  await zeynep.screenshot({ path: `${OUT}23-dogrulandi.png`, fullPage: true });
   ok("Sandbox: imzalı webhook ile “Ödeme sağlayıcısı tarafından doğrulandı”");
 
-  // Ortak fiş: Can kendi ürününü seçer, Ece (fiş sahibi) onaylar
+  // Ortak fiş: Can kendi ürününü seçer, Zeynep (fiş sahibi) onaylar
   const can = await login("Can");
   const yemek = await openGroup(can, "Cuma Yemeği");
   await can.getByRole("link", { name: /Meyhane hesabı/ }).click();
@@ -60,31 +60,31 @@ try {
   await can.screenshot({ path: `${OUT}24-fis-secim.png`, fullPage: true });
   await see(can, "Fişi ekleyen kişi dağılımı onaylayınca");
   ok("Üye kendi telefonundan fiş kalemi seçti; onay yetkisi yok");
-  await openGroup(ece, "Cuma Yemeği");
-  await ece.getByRole("link", { name: /Meyhane hesabı/ }).click();
-  await see(ece, "kalem sahipsiz");
-  ece.once("dialog", (d) => d.accept());
-  await ece.getByRole("button", { name: "Sahipsizleri herkese böl ve onayla" }).click();
-  await ece.waitForURL(/\/expenses\/[0-9a-f-]{36}$/);
-  await see(ece, "₺4.156,00");
-  await ece.screenshot({ path: `${OUT}25-fis-harcama.png`, fullPage: true });
+  await openGroup(zeynep, "Cuma Yemeği");
+  await zeynep.getByRole("link", { name: /Meyhane hesabı/ }).click();
+  await see(zeynep, "kalem sahipsiz");
+  zeynep.once("dialog", (d) => d.accept());
+  await zeynep.getByRole("button", { name: "Sahipsizleri herkese böl ve onayla" }).click();
+  await zeynep.waitForURL(/\/expenses\/[0-9a-f-]{36}$/);
+  await see(zeynep, "₺4.156,00");
+  await zeynep.screenshot({ path: `${OUT}25-fis-harcama.png`, fullPage: true });
   ok("Fiş sahibi dağılımı onayladı; harcama ₺4.156,00 (indirim ve servis dahil)");
 
   // Demo OCR
-  await ece.goto(`${yemek}/receipts/new`);
-  await see(ece, "DEMO: Fotoğrafın okunmuyor");
+  await zeynep.goto(`${yemek}/receipts/new`);
+  await see(zeynep, "DEMO: Fotoğrafın okunmuyor");
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
-  await ece.locator('input[type="file"]:not([capture])').setInputFiles({ name: "fis.png", mimeType: "image/png", buffer: png });
-  await see(ece, "Fiş okundu");
-  await see(ece, "Belirsiz okundu, kontrol et");
-  await ece.screenshot({ path: `${OUT}26-ocr-taslak.png`, fullPage: true });
+  await zeynep.locator('input[type="file"]:not([capture])').setInputFiles({ name: "fis.png", mimeType: "image/png", buffer: png });
+  await see(zeynep, "Fiş okundu");
+  await see(zeynep, "Belirsiz okundu, kontrol et");
+  await zeynep.screenshot({ path: `${OUT}26-ocr-taslak.png`, fullPage: true });
   ok("Demo OCR: düzenlenebilir taslak, belirsiz kalem işaretli");
 
   // iPhone düzeltmesi: kamera ve galeri ayrı; galeri girişinde capture yok (Fotoğraf Arşivi açılabilir)
-  const inputs = await ece.locator('input[type="file"]').evaluateAll((els) => els.map((e) => ({ capture: e.getAttribute("capture"), accept: e.getAttribute("accept") })));
+  const inputs = await zeynep.locator('input[type="file"]').evaluateAll((els) => els.map((e) => ({ capture: e.getAttribute("capture"), accept: e.getAttribute("accept") })));
   if (inputs.length !== 2 || inputs.filter((i) => i.capture).length !== 1) throw new Error("Kamera/galeri girişleri hatalı: " + JSON.stringify(inputs));
   // Büyük (48 MP benzeri) fotoğraf: tarayıcıda küçültülüp JPEG olarak yüklenmeli (8 MB sınırına takılmamalı)
-  const big = await ece.evaluate(async () => {
+  const big = await zeynep.evaluate(async () => {
     // Gerçek fotoğraf gibi sıkıştırılması zor (gürültülü) 3600×2400 görsel → PNG olarak 8 MB'ı aşar
     const c = document.createElement("canvas"); c.width = 3600; c.height = 2400;
     const x = c.getContext("2d"); const d = x.createImageData(c.width, c.height);
@@ -95,8 +95,8 @@ try {
   });
   const bigBuf = Buffer.from(big, "base64");
   if (bigBuf.length <= 8 * 1024 * 1024) throw new Error("Test fotoğrafı 8 MB'tan büyük olmalı, " + bigBuf.length);
-  const uploaded = ece.waitForResponse((r) => r.url().endsWith("/api/upload"));
-  await ece.locator('input[type="file"]:not([capture])').setInputFiles({ name: "IMG_0001.png", mimeType: "image/png", buffer: bigBuf });
+  const uploaded = zeynep.waitForResponse((r) => r.url().endsWith("/api/upload"));
+  await zeynep.locator('input[type="file"]:not([capture])').setInputFiles({ name: "IMG_0001.png", mimeType: "image/png", buffer: bigBuf });
   const up = await uploaded;
   const upJson = await up.json();
   if (up.status() !== 200 || upJson.mime !== "image/jpeg") throw new Error("Büyük fotoğraf yüklenemedi: " + up.status() + " " + JSON.stringify(upJson));
@@ -114,11 +114,11 @@ try {
   const tan = await login("Tan");
   const ev = await openGroup(tan, "Kadıköy Ev");
   await tan.goto(`${ev}/quick`);
-  await tan.getByRole("textbox").fill("Markete 1.240 lira verdim. Dördümüze böl ama temizlik malzemelerinin 200 lirasını Ece'ye yazma.");
+  await tan.getByRole("textbox").fill("Markete 1.240 lira verdim. Dördümüze böl ama temizlik malzemelerinin 200 lirasını Zeynep'e yazma.");
   await tan.getByRole("button", { name: "Taslağı hazırla" }).click();
   await see(tan, "Kimler katılıyor?");
   ok("Belirsiz kişi sayısında (grup 3 kişi, cümlede 4) taslak yerine soru soruldu");
-  await tan.getByRole("textbox").fill("Markete 1.240 lira verdim. Üçümüze böl ama temizlik malzemelerinin 200 lirasını Ece'ye yazma.");
+  await tan.getByRole("textbox").fill("Markete 1.240 lira verdim. Üçümüze böl ama temizlik malzemelerinin 200 lirasını Zeynep'e yazma.");
   await tan.getByRole("button", { name: "Taslağı hazırla" }).click();
   await see(tan, "₺346,67");
   await see(tan, "Henüz hiçbir şey kaydedilmedi");

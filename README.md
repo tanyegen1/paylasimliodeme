@@ -75,7 +75,7 @@ npm run db:seed:demo
 npm run build && npx next start -p 3001
 ```
 
-Giriş ekranındaki demo hesap düğmeleriyle (Tan, Ece, Can, Defne, Mert) "Kadıköy Ev", "Bodrum Hafta Sonu" ve "Cuma Yemeği" gruplarını gezebilirsiniz. Her sayfada DEMO şeridi görünür.
+Giriş ekranındaki demo hesap düğmeleriyle (Tan, Zeynep, Can, Defne, Mert) "Kadıköy Ev", "Bodrum Hafta Sonu" ve "Cuma Yemeği" gruplarını gezebilirsiniz. Her sayfada DEMO şeridi görünür.
 
 ### Zamanlanmış işler
 

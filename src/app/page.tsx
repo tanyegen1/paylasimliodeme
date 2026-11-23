@@ -154,7 +154,7 @@ function Landing() {
     { icon: ReceiptText, title: t("landing.s2t"), body: t("landing.s2b"), tone: "bg-warm-50 text-warm-700" },
     { icon: Scale, title: t("landing.s3t"), body: t("landing.s3b"), tone: "bg-sky-50 text-sky-700" },
   ];
-  const people = [{ n: "Ece", a: "₺620,25", ok: true }, { n: "Can", a: "₺620,25", ok: false }, { n: "Defne", a: "₺620,25", ok: true }];
+  const people = [{ n: "Zeynep", a: "₺620,25", ok: true }, { n: "Can", a: "₺620,25", ok: false }, { n: "Defne", a: "₺620,25", ok: true }];
   return (
     <main className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 pb-10 pt-8">
       <div className="row"><Wordmark /><ThemeButton /></div>
